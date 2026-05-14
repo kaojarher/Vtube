@@ -2,8 +2,8 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VTuber 訪談系統</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>VTuber 訪談系統 - 語音訪談製作</title>
     <script src="https://js.puter.com/v2/"></script>
     <style>
         * {
@@ -40,7 +40,6 @@
             flex-direction: column;
         }
 
-        /* 頂部導航 */
         .header {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             padding: 1rem 2rem;
@@ -66,7 +65,6 @@
             flex-wrap: wrap;
         }
 
-        /* 主容器 */
         .main-content {
             display: flex;
             flex: 1;
@@ -75,7 +73,6 @@
             padding: 1rem;
         }
 
-        /* 側邊欄 */
         .sidebar {
             width: 300px;
             background-color: var(--card-color);
@@ -98,7 +95,6 @@
             letter-spacing: 0.05em;
         }
 
-        /* 中央區域 */
         .main-area {
             flex: 1;
             display: flex;
@@ -122,7 +118,6 @@
             color: var(--primary-color);
         }
 
-        /* 表單元素 */
         .form-group {
             margin-bottom: 1.5rem;
         }
@@ -164,7 +159,6 @@
             min-height: 100px;
         }
 
-        /* 按鈕 */
         button {
             padding: 0.75rem 1.5rem;
             background-color: var(--primary-color);
@@ -173,14 +167,14 @@
             border-radius: var(--radius);
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             font-size: 0.95rem;
         }
 
         button:hover {
             background-color: #5558e3;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         }
 
         button:active {
@@ -205,15 +199,9 @@
 
         button.small {
             padding: 0.5rem 1rem;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
 
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* 角色卡片 */
         .character-card {
             background-color: var(--bg-color);
             border: 1px solid var(--border-color);
@@ -221,12 +209,12 @@
             padding: 1rem;
             margin-bottom: 1rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s;
         }
 
         .character-card:hover {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
         }
 
         .character-card.active {
@@ -248,12 +236,20 @@
             margin-bottom: 0.25rem;
         }
 
-        .character-role {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 600;
         }
 
-        /* 對話框 */
+        .badge.secondary {
+            background-color: var(--secondary-color);
+        }
+
         .dialogue-item {
             background-color: var(--bg-color);
             border-left: 3px solid var(--primary-color);
@@ -288,40 +284,22 @@
             flex-wrap: wrap;
         }
 
-        /* 播放控制 */
         .player-controls {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.75rem;
             align-items: center;
             flex-wrap: wrap;
         }
 
-        .player-controls button {
-            padding: 0.5rem 1rem;
-            font-size: 0.85rem;
-        }
-
         .player-status {
+            margin-top: 1rem;
             font-size: 0.85rem;
-            color: var(--text-secondary);
+            background: var(--bg-color);
+            padding: 0.5rem;
+            border-radius: var(--radius);
+            text-align: center;
         }
 
-        /* 加載狀態 */
-        .loading {
-            display: inline-block;
-            width: 1rem;
-            height: 1rem;
-            border: 2px solid var(--border-color);
-            border-top-color: var(--primary-color);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* 提示信息 */
         .alert {
             padding: 1rem;
             border-radius: var(--radius);
@@ -343,199 +321,12 @@
             color: var(--danger-color);
         }
 
-        .alert.warning {
-            background-color: rgba(245, 158, 11, 0.1);
-            border: 1px solid var(--warning-color);
-            color: var(--warning-color);
-        }
-
         .alert.info {
             background-color: rgba(99, 102, 241, 0.1);
             border: 1px solid var(--primary-color);
             color: var(--primary-color);
         }
 
-        /* 標籤 */
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .badge.secondary {
-            background-color: var(--secondary-color);
-        }
-
-        /* 響應式設計 */
-        @media (max-width: 1024px) {
-            .main-content {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100%;
-                max-height: 300px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .header {
-                padding: 1rem;
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .header h1 {
-                font-size: 1.25rem;
-            }
-
-            .header-actions {
-                width: 100%;
-            }
-
-            .header-actions button {
-                flex: 1;
-                padding: 0.5rem;
-                font-size: 0.85rem;
-            }
-
-            .main-content {
-                padding: 0.5rem;
-                gap: 0.5rem;
-            }
-
-            .sidebar {
-                padding: 1rem;
-            }
-
-            .panel {
-                padding: 1rem;
-            }
-
-            .dialogue-controls {
-                flex-direction: column;
-            }
-
-            .dialogue-controls button {
-                width: 100%;
-            }
-        }
-
-        /* 標籤頁 */
-        .tabs {
-            display: flex;
-            gap: 0.5rem;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 1rem;
-        }
-
-        .tab-button {
-            padding: 0.75rem 1.5rem;
-            background: none;
-            border: none;
-            border-bottom: 2px solid transparent;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-
-        .tab-button:hover {
-            color: var(--text-primary);
-        }
-
-        .tab-button.active {
-            color: var(--primary-color);
-            border-bottom-color: var(--primary-color);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* 圖像上傳 */
-        .image-upload {
-            border: 2px dashed var(--border-color);
-            border-radius: var(--radius);
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .image-upload:hover {
-            border-color: var(--primary-color);
-            background-color: rgba(99, 102, 241, 0.05);
-        }
-
-        .image-upload input {
-            display: none;
-        }
-
-        /* 網格佈局 */
-        .grid {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .grid.cols-2 {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        @media (max-width: 768px) {
-            .grid.cols-2 {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* 滑塊 */
-        input[type="range"] {
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: var(--border-color);
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-        }
-
-        input[type="range"]::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            cursor: pointer;
-            border: none;
-            transition: all 0.3s ease;
-        }
-
-        input[type="range"]::-moz-range-thumb:hover {
-            transform: scale(1.2);
-        }
-
-        /* 模態對話框 */
         .modal {
             display: none;
             position: fixed;
@@ -559,9 +350,8 @@
             padding: 2rem;
             max-width: 500px;
             width: 90%;
-            max-height: 80vh;
+            max-height: 85vh;
             overflow-y: auto;
-            box-shadow: var(--shadow);
         }
 
         .modal-header {
@@ -577,840 +367,615 @@
             justify-content: flex-end;
         }
 
-        /* 進度條 */
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background-color: var(--border-color);
-            border-radius: 2px;
-            overflow: hidden;
-            margin-bottom: 1rem;
+        .grid.cols-2 {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(2, 1fr);
         }
 
-        .progress-fill {
-            height: 100%;
-            background-color: var(--primary-color);
-            transition: width 0.3s ease;
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                max-height: 300px;
+            }
+            .grid.cols-2 {
+                grid-template-columns: 1fr;
+            }
+            .dialogue-controls {
+                flex-direction: column;
+            }
+            .dialogue-controls button {
+                width: 100%;
+            }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(400px); opacity: 0; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- 頂部導航 -->
-        <div class="header">
-            <h1>🎙️ VTuber 訪談系統</h1>
-            <div class="header-actions">
-                <button onclick="createNewInterview()">新建訪談</button>
-                <button class="secondary" onclick="importData()">匯入</button>
-                <button class="success" onclick="exportData()">匯出</button>
+<div class="container">
+    <div class="header">
+        <h1>🎙️ VTuber 訪談系統</h1>
+        <div class="header-actions">
+            <button onclick="createNewInterview()">📝 新建訪談</button>
+            <button class="secondary" onclick="importData()">📂 匯入</button>
+            <button class="success" onclick="exportData()">💾 匯出</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <h3>角色管理</h3>
+                <div id="characterList"></div>
+                <button onclick="showAddCharacterModal()" style="width: 100%; margin-top: 1rem;">+ 新增角色</button>
+            </div>
+            <div class="sidebar-section">
+                <h3>快速工具</h3>
+                <button onclick="generateCharacterImage()" style="width: 100%; margin-bottom: 0.5rem;">🎨 生成角色圖像</button>
+                <button class="secondary" onclick="toggleCharacterEditor()" style="width: 100%;">✏️ 編輯角色</button>
             </div>
         </div>
 
-        <!-- 主容器 -->
-        <div class="main-content">
-            <!-- 左側邊欄 - 角色管理 -->
-            <div class="sidebar">
-                <div class="sidebar-section">
-                    <h3>角色管理</h3>
-                    <div id="characterList"></div>
-                    <button onclick="showAddCharacterModal()" style="width: 100%; margin-top: 1rem;">+ 新增角色</button>
+        <div class="main-area">
+            <div class="panel">
+                <div class="panel-title">訪談設定</div>
+                <div class="form-group">
+                    <label for="interviewTopic">訪談主題</label>
+                    <input type="text" id="interviewTopic" placeholder="例如：燒仙草怎樣才比較好吃" value="燒仙草怎樣才比較好吃">
                 </div>
-
-                <div class="sidebar-section">
-                    <h3>快速操作</h3>
-                    <button onclick="generateCharacterImage()" style="width: 100%; margin-bottom: 0.5rem;">生成角色圖像</button>
-                    <button class="secondary" onclick="toggleCharacterEditor()" style="width: 100%;">編輯角色</button>
-                </div>
-            </div>
-
-            <!-- 中央區域 -->
-            <div class="main-area">
-                <!-- 訪談設定 -->
-                <div class="panel">
-                    <div class="panel-title">訪談設定</div>
+                <div class="grid cols-2">
                     <div class="form-group">
-                        <label for="interviewTopic">訪談主題</label>
-                        <input type="text" id="interviewTopic" placeholder="例如：燒仙草怎樣才比較好吃" value="燒仙草怎樣才比較好吃">
+                        <label for="hostCharacter">主播</label>
+                        <select id="hostCharacter"></select>
                     </div>
-                    <div class="grid cols-2">
-                        <div class="form-group">
-                            <label for="hostCharacter">主播</label>
-                            <select id="hostCharacter"></select>
-                        </div>
-                        <div class="form-group">
-                            <label for="guestCharacter">來賓</label>
-                            <select id="guestCharacter"></select>
-                        </div>
+                    <div class="form-group">
+                        <label for="guestCharacter">來賓</label>
+                        <select id="guestCharacter"></select>
                     </div>
-                    <button onclick="generateDialogue()" style="width: 100%;">🤖 生成對話</button>
                 </div>
+                <button onclick="generateDialogue()" style="width: 100%;">🤖 生成對話 (AI)</button>
+            </div>
 
-                <!-- 對話編輯 -->
-                <div class="panel">
-                    <div class="panel-title">訪談對話</div>
-                    <div id="dialogueContainer"></div>
-                    <button onclick="addDialogueItem()" style="width: 100%; margin-top: 1rem;">+ 新增對話</button>
-                </div>
+            <div class="panel">
+                <div class="panel-title">📝 訪談對話</div>
+                <div id="dialogueContainer"></div>
+                <button onclick="addDialogueItem()" style="width: 100%; margin-top: 1rem;">+ 新增對話</button>
+            </div>
 
-                <!-- 播放控制 -->
-                <div class="panel">
-                    <div class="panel-title">播放控制</div>
-                    <div class="player-controls">
-                        <button onclick="playAll()">▶️ 播放全部</button>
-                        <button class="secondary" onclick="stopPlayback()">⏹️ 停止</button>
-                        <button class="success" onclick="synthesizeAllSpeech()">🔊 合成語音</button>
-                    </div>
-                    <div id="playerStatus" class="player-status" style="margin-top: 1rem;"></div>
+            <div class="panel">
+                <div class="panel-title">🔊 語音播放控制</div>
+                <div class="player-controls">
+                    <button onclick="playAllDialogue()">▶️ 播放全部</button>
+                    <button class="secondary" onclick="stopAllSpeech()">⏹️ 停止</button>
+                    <button class="success" onclick="speakAllSequentially()">🔁 朗讀全部對話</button>
                 </div>
+                <div id="playerStatus" class="player-status">⚡ 就緒，點擊對話旁的「🔊朗讀」或「播放全部」</div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- 新增角色模態 -->
-    <div id="addCharacterModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">新增角色</div>
-            <div class="form-group">
-                <label for="charName">角色名稱</label>
-                <input type="text" id="charName" placeholder="例如：小隻">
-            </div>
-            <div class="form-group">
-                <label for="charRole">角色身份</label>
-                <select id="charRole">
-                    <option value="host">主播</option>
-                    <option value="guest">來賓</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="charDescription">角色描述</label>
-                <textarea id="charDescription" placeholder="描述角色的特徵、個性等"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="charImageUrl">角色圖像 URL</label>
-                <input type="text" id="charImageUrl" placeholder="https://...">
-            </div>
-            <div class="form-group">
-                <label for="charVoice">語音</label>
-                <select id="charVoice">
-                    <option value="en-US-Neural2-C">高音 (女性)</option>
-                    <option value="en-US-Neural2-A">低音 (女性)</option>
-                    <option value="en-US-Neural2-E">中音 (男性)</option>
-                    <option value="en-US-Neural2-D">低音 (男性)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="charSpeed">語速 (0.5 - 2.0)</label>
-                <input type="number" id="charSpeed" min="0.5" max="2.0" step="0.1" value="1.0">
-            </div>
-            <div class="form-group">
-                <label for="charPitch">音高 (0.5 - 2.0)</label>
-                <input type="number" id="charPitch" min="0.5" max="2.0" step="0.1" value="1.0">
-            </div>
-            <div class="modal-footer">
-                <button onclick="closeModal('addCharacterModal')">取消</button>
-                <button class="success" onclick="saveCharacter()">保存</button>
-            </div>
+<!-- 新增/編輯角色視窗 -->
+<div id="addCharacterModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header" id="charModalTitle">新增角色</div>
+        <div class="form-group">
+            <label>角色名稱</label>
+            <input type="text" id="charName" placeholder="例如：小隻">
+        </div>
+        <div class="form-group">
+            <label>角色身份</label>
+            <select id="charRole">
+                <option value="host">主播</option>
+                <option value="guest">來賓</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>角色描述 (個性/背景)</label>
+            <textarea id="charDescription" placeholder="描述角色的特徵、語氣等"></textarea>
+        </div>
+        <div class="form-group">
+            <label>角色圖像 URL (可選)</label>
+            <input type="text" id="charImageUrl" placeholder="https://...">
+        </div>
+        <div class="form-group">
+            <label>語速 (0.5 ~ 2.0)</label>
+            <input type="number" id="charSpeed" min="0.5" max="2.0" step="0.1" value="1.0">
+        </div>
+        <div class="form-group">
+            <label>音高 (0.5 ~ 2.0)</label>
+            <input type="number" id="charPitch" min="0.5" max="2.0" step="0.1" value="1.0">
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal('addCharacterModal')">取消</button>
+            <button class="success" onclick="saveCharacter()">保存</button>
         </div>
     </div>
+</div>
 
-    <!-- 編輯對話模態 -->
-    <div id="editDialogueModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">編輯對話</div>
-            <div class="form-group">
-                <label for="editDialogueCharacter">角色</label>
-                <select id="editDialogueCharacter"></select>
-            </div>
-            <div class="form-group">
-                <label for="editDialogueText">對話內容</label>
-                <textarea id="editDialogueText"></textarea>
-            </div>
-            <div class="modal-footer">
-                <button onclick="closeModal('editDialogueModal')">取消</button>
-                <button class="success" onclick="saveDialogueEdit()">保存</button>
-            </div>
+<!-- 編輯對話視窗 -->
+<div id="editDialogueModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">編輯對話</div>
+        <div class="form-group">
+            <label>發言角色</label>
+            <select id="editDialogueCharacter"></select>
+        </div>
+        <div class="form-group">
+            <label>對話內容</label>
+            <textarea id="editDialogueText" rows="3"></textarea>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal('editDialogueModal')">取消</button>
+            <button class="success" onclick="saveDialogueEdit()">保存</button>
         </div>
     </div>
+</div>
 
-    <script>
-        // ========== 全局狀態 ==========
-        const state = {
-            characters: [],
-            currentInterview: {
-                title: '新訪談',
-                topic: '',
-                dialogue: []
-            },
-            selectedCharacterId: null,
-            editingDialogueIndex: null,
-            isPlaying: false,
-            currentAudioIndex: 0
+<script>
+    // ---------- 全域狀態 ----------
+    let state = {
+        characters: [],
+        currentInterview: {
+            title: '新訪談',
+            topic: '燒仙草怎樣才比較好吃',
+            dialogue: []
+        },
+        selectedCharacterId: null,
+        editingDialogueIndex: null,
+        speechQueue: [],         // 播放佇列
+        isSpeaking: false,
+        currentUtterance: null
+    };
+
+    // ---------- 初始化 & 語音引擎 ----------
+    let cachedVoice = null;  // 預設中文語音
+
+    function getChineseVoice() {
+        if (cachedVoice) return cachedVoice;
+        const voices = speechSynthesis.getVoices();
+        // 優先找 zh-TW / zh-CN
+        let selected = voices.find(v => v.lang === 'zh-TW') || voices.find(v => v.lang === 'zh-CN') || voices.find(v => v.lang.startsWith('zh'));
+        if (!selected && voices.length) selected = voices[0];
+        cachedVoice = selected;
+        return cachedVoice;
+    }
+
+    // 確保語音清單載入後重新整理一次快取
+    if (typeof speechSynthesis !== 'undefined') {
+        speechSynthesis.onvoiceschanged = () => {
+            cachedVoice = null;
+            getChineseVoice();
         };
+        setTimeout(() => { getChineseVoice(); }, 200);
+    }
 
-        // ========== 初始化 ==========
-        document.addEventListener('DOMContentLoaded', async () => {
-            loadDataFromStorage();
-            renderCharacterList();
-            updateCharacterSelects();
-            await initializePuterJS();
+    // 停止所有語音並清空佇列
+    function stopAllSpeech() {
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
+        state.isSpeaking = false;
+        state.speechQueue = [];
+        if (state.currentUtterance) {
+            try { state.currentUtterance.onend = null; } catch(e) {}
+            state.currentUtterance = null;
+        }
+        updatePlayerStatus('已停止播放', false);
+    }
+
+    // 朗讀單句 (直接播放，不打斷? 為了體驗，會先停止目前再播)
+    function speakText(text, rate = 1.0, pitch = 1.0) {
+        return new Promise((resolve, reject) => {
+            if (!text || text.trim() === '') {
+                reject('無文字');
+                return;
+            }
+            // 停止目前正在播放的，避免重疊
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = Math.min(2.0, Math.max(0.5, rate));
+            utterance.pitch = Math.min(2.0, Math.max(0.5, pitch));
+            utterance.lang = 'zh-TW';
+            const voice = getChineseVoice();
+            if (voice) utterance.voice = voice;
+            utterance.onend = () => {
+                resolve();
+            };
+            utterance.onerror = (err) => {
+                console.warn('語音錯誤', err);
+                reject(err);
+            };
+            state.currentUtterance = utterance;
+            window.speechSynthesis.speak(utterance);
         });
+    }
 
-        // ========== Puter.js 初始化 ==========
-        async function initializePuterJS() {
+    // 朗讀特定對話索引 (使用角色配置的語速/音高)
+    async function speakDialogueAtIndex(index) {
+        if (!state.currentInterview.dialogue[index]) return false;
+        const item = state.currentInterview.dialogue[index];
+        const character = state.characters.find(c => c.id === item.characterId);
+        if (!character) {
+            showNotification(`找不到角色設定，使用預設語音`, 'warning');
+            await speakText(item.text, 1.0, 1.0);
+            return true;
+        }
+        const speed = character.voiceConfig?.speed ?? 1.0;
+        const pitch = character.voiceConfig?.pitch ?? 1.0;
+        await speakText(item.text, speed, pitch);
+        return true;
+    }
+
+    // 播放全部 (順序朗讀，帶進度顯示)
+    async function playAllDialogue() {
+        if (!state.currentInterview.dialogue.length) {
+            showNotification('沒有對話可播放', 'error');
+            return;
+        }
+        stopAllSpeech();
+        const total = state.currentInterview.dialogue.length;
+        updatePlayerStatus(`🎧 開始播放全部 (0/${total})`, true);
+        for (let i = 0; i < total; i++) {
+            if (!state.isSpeaking && !state.speechQueue.length) {
+                // 如果被外部 stop 中斷則離開
+                if (!state.isSpeaking && i>0) break;
+            }
+            state.isSpeaking = true;
+            updatePlayerStatus(`🔊 播放中: ${i+1}/${total} - ${state.currentInterview.dialogue[i].characterName}`, true);
             try {
-                // 檢查 Puter.js 是否已加載
-                if (typeof puter !== 'undefined') {
-                    console.log('✅ Puter.js 已成功加載');
-                } else {
-                    console.warn('⚠️ Puter.js 未加載，某些功能可能不可用');
-                }
-            } catch (error) {
-                console.error('❌ Puter.js 初始化失敗:', error);
+                await speakDialogueAtIndex(i);
+            } catch (err) {
+                console.warn('播放單句失敗', err);
             }
+            // 避免連續播放過快
+            await new Promise(r => setTimeout(r, 200));
         }
+        state.isSpeaking = false;
+        updatePlayerStatus('✅ 全部播放完畢', false);
+    }
 
-        // ========== 角色管理 ==========
-        function renderCharacterList() {
-            const container = document.getElementById('characterList');
-            container.innerHTML = '';
+    // 朗讀全部對話 (類似播放全部但給獨立按鈕，行為一致)
+    async function speakAllSequentially() {
+        await playAllDialogue();
+    }
 
-            state.characters.forEach((char, index) => {
-                const card = document.createElement('div');
-                card.className = `character-card ${state.selectedCharacterId === char.id ? 'active' : ''}`;
-                card.onclick = () => selectCharacter(char.id);
-
-                card.innerHTML = `
-                    <img src="${char.imageUrl || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23334155%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23cbd5e1%22 font-size=%2214%22%3E圖像%3C/text%3E%3C/svg%3E'}" class="character-image" alt="${char.name}">
-                    <div class="character-name">${char.name}</div>
-                    <div class="character-role"><span class="badge ${char.role === 'host' ? '' : 'secondary'}">${char.role === 'host' ? '主播' : '來賓'}</span></div>
-                    <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
-                        <button class="small" onclick="editCharacter('${char.id}', event)">編輯</button>
-                        <button class="small secondary" onclick="deleteCharacter('${char.id}', event)">刪除</button>
-                    </div>
-                `;
-
-                container.appendChild(card);
-            });
+    // 朗讀指定單句 (獨立按鈕)
+    async function readSingleDialogue(index) {
+        if (!state.currentInterview.dialogue[index]) return;
+        stopAllSpeech();  // 中斷當下，立刻朗讀新句
+        const item = state.currentInterview.dialogue[index];
+        updatePlayerStatus(`🎙️ 正在朗讀: ${item.characterName} ...`, true);
+        try {
+            await speakDialogueAtIndex(index);
+            updatePlayerStatus('✅ 朗讀完成', false);
+        } catch (err) {
+            updatePlayerStatus('❌ 朗讀失敗', false);
+            showNotification('語音播放失敗，請重試', 'error');
         }
+    }
 
-        function selectCharacter(id) {
-            state.selectedCharacterId = id;
-            renderCharacterList();
+    function updatePlayerStatus(msg, isPlaying = false) {
+        const statusDiv = document.getElementById('playerStatus');
+        if (statusDiv) statusDiv.innerHTML = msg;
+        state.isSpeaking = isPlaying;
+    }
+
+    // ---------- 角色管理 ----------
+    function renderCharacterList() {
+        const container = document.getElementById('characterList');
+        if (!container) return;
+        container.innerHTML = '';
+        state.characters.forEach(char => {
+            const card = document.createElement('div');
+            card.className = `character-card ${state.selectedCharacterId === char.id ? 'active' : ''}`;
+            card.onclick = (e) => { if(!e.target.closest('button')) selectCharacter(char.id); };
+            card.innerHTML = `
+                <img src="${char.imageUrl || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23334155%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23cbd5e1%22 font-size=%2214%22%3E圖像%3C/text%3E%3C/svg%3E'}" class="character-image">
+                <div class="character-name">${escapeHtml(char.name)}</div>
+                <div class="character-role"><span class="badge ${char.role === 'host' ? '' : 'secondary'}">${char.role === 'host' ? '主播' : '來賓'}</span></div>
+                <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
+                    <button class="small" onclick="editCharacterById('${char.id}', event)">編輯</button>
+                    <button class="small secondary" onclick="deleteCharacterById('${char.id}', event)">刪除</button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+        if(state.characters.length === 0) container.innerHTML = '<p style="text-align:center; color:var(--text-secondary)">暫無角色，請新增</p>';
+    }
+
+    function selectCharacter(id) { state.selectedCharacterId = id; renderCharacterList(); }
+    function showAddCharacterModal() { 
+        document.getElementById('charModalTitle').innerText = '新增角色';
+        document.getElementById('charName').value = '';
+        document.getElementById('charDescription').value = '';
+        document.getElementById('charImageUrl').value = '';
+        document.getElementById('charSpeed').value = '1.0';
+        document.getElementById('charPitch').value = '1.0';
+        document.getElementById('charRole').value = 'guest';
+        window._editingCharId = null;
+        document.getElementById('addCharacterModal').classList.add('active');
+    }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    function saveCharacter() {
+        const name = document.getElementById('charName').value.trim();
+        if(!name) { showNotification('請輸入角色名稱', 'error'); return; }
+        const role = document.getElementById('charRole').value;
+        const description = document.getElementById('charDescription').value;
+        const imageUrl = document.getElementById('charImageUrl').value;
+        const speed = parseFloat(document.getElementById('charSpeed').value);
+        const pitch = parseFloat(document.getElementById('charPitch').value);
+        const charData = {
+            id: window._editingCharId || `char_${Date.now()}`,
+            name, role, description, imageUrl,
+            voiceConfig: { speed, pitch }
+        };
+        if(window._editingCharId) {
+            const idx = state.characters.findIndex(c => c.id === window._editingCharId);
+            if(idx !== -1) state.characters[idx] = charData;
+            window._editingCharId = null;
+        } else {
+            state.characters.push(charData);
         }
-
-        function showAddCharacterModal() {
-            document.getElementById('addCharacterModal').classList.add('active');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        function saveCharacter() {
-            const name = document.getElementById('charName').value;
-            const role = document.getElementById('charRole').value;
-            const description = document.getElementById('charDescription').value;
-            const imageUrl = document.getElementById('charImageUrl').value;
-            const voice = document.getElementById('charVoice').value;
-            const speed = parseFloat(document.getElementById('charSpeed').value);
-            const pitch = parseFloat(document.getElementById('charPitch').value);
-
-            if (!name.trim()) {
-                alert('請輸入角色名稱');
-                return;
-            }
-
-            const character = {
-                id: `char_${Date.now()}`,
-                name,
-                role,
-                description,
-                imageUrl,
-                voiceConfig: {
-                    engine: 'google',
-                    voiceId: voice,
-                    language: 'zh-TW',
-                    speed,
-                    pitch
-                }
-            };
-
-            state.characters.push(character);
+        saveDataToStorage();
+        renderCharacterList();
+        updateCharacterSelects();
+        closeModal('addCharacterModal');
+        showNotification(`角色「${name}」已${window._editingCharId ? '更新' : '新增'}`, 'success');
+    }
+    function editCharacterById(id, event) {
+        if(event) event.stopPropagation();
+        const char = state.characters.find(c => c.id === id);
+        if(!char) return;
+        document.getElementById('charModalTitle').innerText = '編輯角色';
+        document.getElementById('charName').value = char.name;
+        document.getElementById('charRole').value = char.role;
+        document.getElementById('charDescription').value = char.description || '';
+        document.getElementById('charImageUrl').value = char.imageUrl || '';
+        document.getElementById('charSpeed').value = char.voiceConfig?.speed ?? 1.0;
+        document.getElementById('charPitch').value = char.voiceConfig?.pitch ?? 1.0;
+        window._editingCharId = char.id;
+        document.getElementById('addCharacterModal').classList.add('active');
+    }
+    function deleteCharacterById(id, event) {
+        event.stopPropagation();
+        if(confirm('刪除角色會影響已有對話，確定嗎？')) {
+            state.characters = state.characters.filter(c => c.id !== id);
+            // 將對話中相關角色的發言保留但角色遺失處理，直接保留文字但避免錯誤，渲染時會檢查角色是否存在
             saveDataToStorage();
             renderCharacterList();
             updateCharacterSelects();
-            closeModal('addCharacterModal');
-
-            // 清空表單
-            document.getElementById('charName').value = '';
-            document.getElementById('charDescription').value = '';
-            document.getElementById('charImageUrl').value = '';
-
-            showNotification('✅ 角色已新增', 'success');
-        }
-
-        function editCharacter(id, event) {
-            event.stopPropagation();
-            const char = state.characters.find(c => c.id === id);
-            if (!char) return;
-
-            document.getElementById('charName').value = char.name;
-            document.getElementById('charRole').value = char.role;
-            document.getElementById('charDescription').value = char.description;
-            document.getElementById('charImageUrl').value = char.imageUrl || '';
-            document.getElementById('charVoice').value = char.voiceConfig.voiceId;
-            document.getElementById('charSpeed').value = char.voiceConfig.speed;
-            document.getElementById('charPitch').value = char.voiceConfig.pitch;
-
-            // 修改保存邏輯以更新現有角色
-            const originalSaveCharacter = window.saveCharacter;
-            window.saveCharacter = function() {
-                const name = document.getElementById('charName').value;
-                const role = document.getElementById('charRole').value;
-                const description = document.getElementById('charDescription').value;
-                const imageUrl = document.getElementById('charImageUrl').value;
-                const voice = document.getElementById('charVoice').value;
-                const speed = parseFloat(document.getElementById('charSpeed').value);
-                const pitch = parseFloat(document.getElementById('charPitch').value);
-
-                char.name = name;
-                char.role = role;
-                char.description = description;
-                char.imageUrl = imageUrl;
-                char.voiceConfig.voiceId = voice;
-                char.voiceConfig.speed = speed;
-                char.voiceConfig.pitch = pitch;
-
-                saveDataToStorage();
-                renderCharacterList();
-                updateCharacterSelects();
-                closeModal('addCharacterModal');
-                window.saveCharacter = originalSaveCharacter;
-                showNotification('✅ 角色已更新', 'success');
-            };
-
-            showAddCharacterModal();
-        }
-
-        function deleteCharacter(id, event) {
-            event.stopPropagation();
-            if (confirm('確定要刪除此角色嗎？')) {
-                state.characters = state.characters.filter(c => c.id !== id);
-                saveDataToStorage();
-                renderCharacterList();
-                updateCharacterSelects();
-                showNotification('✅ 角色已刪除', 'success');
-            }
-        }
-
-        // ========== 訪談管理 ==========
-        function createNewInterview() {
-            state.currentInterview = {
-                title: `訪談 ${new Date().toLocaleString('zh-TW')}`,
-                topic: document.getElementById('interviewTopic').value || '',
-                dialogue: []
-            };
-            document.getElementById('dialogueContainer').innerHTML = '';
-            showNotification('✅ 新訪談已建立', 'success');
-        }
-
-        async function generateDialogue() {
-            const topic = document.getElementById('interviewTopic').value;
-            const hostId = document.getElementById('hostCharacter').value;
-            const guestId = document.getElementById('guestCharacter').value;
-
-            if (!topic.trim()) {
-                showNotification('❌ 請輸入訪談主題', 'error');
-                return;
-            }
-
-            if (!hostId || !guestId) {
-                showNotification('❌ 請選擇主播和來賓', 'error');
-                return;
-            }
-
-            const host = state.characters.find(c => c.id === hostId);
-            const guest = state.characters.find(c => c.id === guestId);
-
-            showNotification('⏳ 正在生成對話...', 'info');
-
-            try {
-                // 使用 Puter.js 生成對話
-                if (typeof puter !== 'undefined' && puter.ai && puter.ai.chat) {
-                    const prompt = `你是一個訪談節目的編劇。請為以下訪談生成一段有趣的對話。
-                    
-主題: ${topic}
-主播: ${host.name} (${host.description})
-來賓: ${guest.name} (${guest.description})
-
-請生成 4-6 句對話，交替出現主播和來賓的發言。格式如下：
-主播: [對話內容]
-來賓: [對話內容]
-...
-
-請確保對話自然流暢，符合主題。`;
-
-                    const response = await puter.ai.chat(prompt, {
-                        model: 'gpt-4',
-                        temperature: 0.7
-                    });
-
-                    // 解析對話
-                    const lines = response.split('\n').filter(line => line.trim());
-                    state.currentInterview.dialogue = [];
-
-                    lines.forEach((line, index) => {
-                        if (line.includes('主播:')) {
-                            state.currentInterview.dialogue.push({
-                                characterId: hostId,
-                                characterName: host.name,
-                                text: line.replace('主播:', '').trim(),
-                                voiceUrl: null
-                            });
-                        } else if (line.includes('來賓:')) {
-                            state.currentInterview.dialogue.push({
-                                characterId: guestId,
-                                characterName: guest.name,
-                                text: line.replace('來賓:', '').trim(),
-                                voiceUrl: null
-                            });
-                        }
-                    });
-
-                    renderDialogue();
-                    showNotification('✅ 對話已生成', 'success');
-                } else {
-                    // 如果 Puter.js 不可用，使用示例對話
-                    generateSampleDialogue(hostId, guestId, host.name, guest.name);
-                }
-            } catch (error) {
-                console.error('生成對話失敗:', error);
-                generateSampleDialogue(hostId, guestId, host.name, guest.name);
-            }
-        }
-
-        function generateSampleDialogue(hostId, guestId, hostName, guestName) {
-            const sampleDialogues = [
-                { role: 'host', text: '今天我們來討論燒仙草怎樣才比較好吃！' },
-                { role: 'guest', text: '好啊，我覺得關鍵在於火候和配料的搭配。' },
-                { role: 'host', text: '那你覺得什麼樣的火候最好呢？' },
-                { role: 'guest', text: '我認為要用中火，讓仙草慢慢受熱，這樣才能保留香氣。' },
-                { role: 'host', text: '原來如此！那配料方面呢？' },
-                { role: 'guest', text: '配料很重要，我喜歡加蜂蜜、檸檬和冰塊，這樣既清爽又有層次感。' }
-            ];
-
-            state.currentInterview.dialogue = sampleDialogues.map(item => ({
-                characterId: item.role === 'host' ? hostId : guestId,
-                characterName: item.role === 'host' ? hostName : guestName,
-                text: item.text,
-                voiceUrl: null
-            }));
-
             renderDialogue();
-            showNotification('✅ 示例對話已加載', 'success');
+            showNotification('角色已刪除', 'success');
         }
+    }
+    function toggleCharacterEditor() { showAddCharacterModal(); }
 
-        function renderDialogue() {
-            const container = document.getElementById('dialogueContainer');
-            container.innerHTML = '';
-
-            if (state.currentInterview.dialogue.length === 0) {
-                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">暫無對話，請先生成對話</p>';
-                return;
-            }
-
-            state.currentInterview.dialogue.forEach((item, index) => {
-                const div = document.createElement('div');
-                const isGuest = state.characters.find(c => c.id === item.characterId)?.role === 'guest';
-                div.className = `dialogue-item ${isGuest ? 'guest' : ''}`;
-
-                div.innerHTML = `
-                    <div class="dialogue-character">${item.characterName}</div>
-                    <div class="dialogue-text">${item.text}</div>
-                    <div class="dialogue-controls">
-                        <button class="small" onclick="editDialogue(${index})">編輯</button>
-                        <button class="small secondary" onclick="deleteDialogue(${index})">刪除</button>
-                        <button class="small success" onclick="synthesizeSpeech(${index})">🔊 合成語音</button>
-                        ${item.voiceUrl ? `<button class="small" onclick="playAudio(${index})">▶️ 播放</button>` : ''}
-                    </div>
-                `;
-
-                container.appendChild(div);
-            });
+    // 對話渲染
+    function renderDialogue() {
+        const container = document.getElementById('dialogueContainer');
+        if(!container) return;
+        if(state.currentInterview.dialogue.length === 0) {
+            container.innerHTML = '<p style="color: var(--text-secondary); text-align:center; padding:2rem;">暫無對話，請點「生成對話」或手動新增</p>';
+            return;
         }
-
-        function addDialogueItem() {
-            const hostId = document.getElementById('hostCharacter').value;
-            if (!hostId) {
-                showNotification('❌ 請先選擇主播', 'error');
-                return;
-            }
-
-            state.currentInterview.dialogue.push({
-                characterId: hostId,
-                characterName: state.characters.find(c => c.id === hostId).name,
-                text: '',
-                voiceUrl: null
-            });
-
-            renderDialogue();
-        }
-
-        function editDialogue(index) {
-            state.editingDialogueIndex = index;
-            const item = state.currentInterview.dialogue[index];
-
-            document.getElementById('editDialogueCharacter').innerHTML = state.characters
-                .map(c => `<option value="${c.id}" ${c.id === item.characterId ? 'selected' : ''}>${c.name}</option>`)
-                .join('');
-
-            document.getElementById('editDialogueText').value = item.text;
-            document.getElementById('editDialogueModal').classList.add('active');
-        }
-
-        function saveDialogueEdit() {
-            const index = state.editingDialogueIndex;
-            const characterId = document.getElementById('editDialogueCharacter').value;
-            const text = document.getElementById('editDialogueText').value;
-
-            if (!text.trim()) {
-                showNotification('❌ 對話內容不能為空', 'error');
-                return;
-            }
-
-            const character = state.characters.find(c => c.id === characterId);
-            state.currentInterview.dialogue[index] = {
-                characterId,
-                characterName: character.name,
-                text,
-                voiceUrl: null
-            };
-
-            renderDialogue();
-            closeModal('editDialogueModal');
-            showNotification('✅ 對話已更新', 'success');
-        }
-
-        function deleteDialogue(index) {
-            if (confirm('確定要刪除此對話嗎？')) {
-                state.currentInterview.dialogue.splice(index, 1);
-                renderDialogue();
-                showNotification('✅ 對話已刪除', 'success');
-            }
-        }
-
-        // ========== 語音合成 ==========
-        async function synthesizeSpeech(index) {
-            const item = state.currentInterview.dialogue[index];
+        container.innerHTML = '';
+        state.currentInterview.dialogue.forEach((item, idx) => {
             const character = state.characters.find(c => c.id === item.characterId);
-
-            if (!character) {
-                showNotification('❌ 找不到角色', 'error');
-                return;
-            }
-
-            showNotification('⏳ 正在合成語音...', 'info');
-
-            try {
-                if (typeof puter !== 'undefined' && puter.ai && puter.ai.txt2speech) {
-                    const audioUrl = await puter.ai.txt2speech(item.text, {
-                        engine: 'google',
-                        voice: character.voiceConfig.voiceId,
-                        language: 'zh-TW',
-                        speed: character.voiceConfig.speed,
-                        pitch: character.voiceConfig.pitch
-                    });
-
-                    state.currentInterview.dialogue[index].voiceUrl = audioUrl;
-                    renderDialogue();
-                    showNotification('✅ 語音已合成', 'success');
-                } else {
-                    showNotification('⚠️ 語音合成功能暫不可用', 'warning');
-                }
-            } catch (error) {
-                console.error('語音合成失敗:', error);
-                showNotification('❌ 語音合成失敗: ' + error.message, 'error');
-            }
+            const charName = character ? character.name : item.characterName || '未知角色';
+            const isGuest = character?.role === 'guest';
+            const div = document.createElement('div');
+            div.className = `dialogue-item ${isGuest ? 'guest' : ''}`;
+            div.innerHTML = `
+                <div class="dialogue-character">${escapeHtml(charName)}</div>
+                <div class="dialogue-text">${escapeHtml(item.text)}</div>
+                <div class="dialogue-controls">
+                    <button class="small" onclick="editDialogueItem(${idx})">✏️ 編輯</button>
+                    <button class="small secondary" onclick="deleteDialogueItem(${idx})">🗑️ 刪除</button>
+                    <button class="small success" onclick="readSingleDialogue(${idx})">🔊 朗讀</button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+    function editDialogueItem(index) {
+        state.editingDialogueIndex = index;
+        const item = state.currentInterview.dialogue[index];
+        const selectEl = document.getElementById('editDialogueCharacter');
+        selectEl.innerHTML = state.characters.map(c => `<option value="${c.id}" ${c.id === item.characterId ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('');
+        document.getElementById('editDialogueText').value = item.text;
+        document.getElementById('editDialogueModal').classList.add('active');
+    }
+    function saveDialogueEdit() {
+        const idx = state.editingDialogueIndex;
+        const newCharId = document.getElementById('editDialogueCharacter').value;
+        const newText = document.getElementById('editDialogueText').value.trim();
+        if(!newText) { showNotification('對話內容不可空白', 'error'); return; }
+        const targetChar = state.characters.find(c => c.id === newCharId);
+        if(!targetChar) { showNotification('請選擇有效角色', 'error'); return; }
+        state.currentInterview.dialogue[idx] = {
+            characterId: targetChar.id,
+            characterName: targetChar.name,
+            text: newText
+        };
+        saveDataToStorage();
+        renderDialogue();
+        closeModal('editDialogueModal');
+        showNotification('對話已更新', 'success');
+    }
+    function deleteDialogueItem(idx) {
+        if(confirm('刪除此對話？')) {
+            state.currentInterview.dialogue.splice(idx,1);
+            renderDialogue();
+            saveDataToStorage();
         }
+    }
+    function addDialogueItem() {
+        const hostId = document.getElementById('hostCharacter').value;
+        if(!hostId || !state.characters.length) { showNotification('請先新增角色並選擇主播', 'error'); return; }
+        const hostChar = state.characters.find(c => c.id === hostId);
+        if(!hostChar) return;
+        state.currentInterview.dialogue.push({
+            characterId: hostChar.id,
+            characterName: hostChar.name,
+            text: '輸入新對話內容...'
+        });
+        renderDialogue();
+        saveDataToStorage();
+    }
 
-        async function synthesizeAllSpeech() {
-            let successCount = 0;
-            showNotification('⏳ 正在合成所有語音...', 'info');
-
-            for (let i = 0; i < state.currentInterview.dialogue.length; i++) {
-                try {
-                    await synthesizeSpeech(i);
-                    successCount++;
-                    await new Promise(resolve => setTimeout(resolve, 500)); // 避免 API 限制
-                } catch (error) {
-                    console.error(`合成第 ${i + 1} 句語音失敗:`, error);
-                }
-            }
-
-            showNotification(`✅ 已合成 ${successCount}/${state.currentInterview.dialogue.length} 句語音`, 'success');
-        }
-
-        function playAudio(index) {
-            const item = state.currentInterview.dialogue[index];
-            if (!item.voiceUrl) {
-                showNotification('❌ 此對話還未合成語音', 'error');
-                return;
-            }
-
-            const audio = new Audio(item.voiceUrl);
-            audio.play().catch(error => {
-                console.error('播放失敗:', error);
-                showNotification('❌ 播放失敗', 'error');
-            });
-        }
-
-        function playAll() {
-            if (state.currentInterview.dialogue.length === 0) {
-                showNotification('❌ 沒有對話可播放', 'error');
-                return;
-            }
-
-            state.isPlaying = true;
-            state.currentAudioIndex = 0;
-            playNextAudio();
-        }
-
-        function playNextAudio() {
-            if (!state.isPlaying || state.currentAudioIndex >= state.currentInterview.dialogue.length) {
-                state.isPlaying = false;
-                updatePlayerStatus();
-                return;
-            }
-
-            const item = state.currentInterview.dialogue[state.currentAudioIndex];
-            updatePlayerStatus();
-
-            if (!item.voiceUrl) {
-                state.currentAudioIndex++;
-                setTimeout(playNextAudio, 100);
-                return;
-            }
-
-            const audio = new Audio(item.voiceUrl);
-            audio.onended = () => {
-                state.currentAudioIndex++;
-                setTimeout(playNextAudio, 300);
-            };
-
-            audio.play().catch(error => {
-                console.error('播放失敗:', error);
-                state.currentAudioIndex++;
-                setTimeout(playNextAudio, 100);
-            });
-        }
-
-        function stopPlayback() {
-            state.isPlaying = false;
-            state.currentAudioIndex = 0;
-            updatePlayerStatus();
-            showNotification('⏹️ 已停止播放', 'info');
-        }
-
-        function updatePlayerStatus() {
-            const status = document.getElementById('playerStatus');
-            if (state.isPlaying) {
-                status.textContent = `正在播放: ${state.currentAudioIndex + 1}/${state.currentInterview.dialogue.length}`;
+    // AI 生成對話 (保留 AI 生成能力，優先 puter)
+    async function generateDialogue() {
+        const topic = document.getElementById('interviewTopic').value;
+        const hostId = document.getElementById('hostCharacter').value;
+        const guestId = document.getElementById('guestCharacter').value;
+        if(!hostId || !guestId) { showNotification('請選擇主播與來賓', 'error'); return; }
+        const host = state.characters.find(c=>c.id===hostId);
+        const guest = state.characters.find(c=>c.id===guestId);
+        if(!host||!guest) return;
+        showNotification('AI 生成對話中...', 'info');
+        try {
+            let raw = '';
+            if(typeof puter !== 'undefined' && puter.ai && puter.ai.chat) {
+                const prompt = `主題:${topic}\n主播:${host.name}(${host.description||''})\n來賓:${guest.name}(${guest.description||''})\n請產出4~6句訪談對話，格式每行開頭為「主播:」或「來賓:」，內容生動自然。`;
+                const resp = await puter.ai.chat(prompt, { model: 'gpt-3.5-turbo', temperature: 0.7 });
+                raw = resp;
             } else {
-                status.textContent = '已停止';
+                raw = `主播: 今天來聊聊「${topic}」，你覺得怎樣最好吃？\n來賓: 我覺得關鍵在於仙草要Q彈，搭配芋圓和紅豆！\n主播: 原來如此，那糖水的比例呢？\n來賓: 糖水不能太甜，帶點焦香更完美～`;
             }
-        }
-
-        // ========== 圖像生成 ==========
-        async function generateCharacterImage() {
-            const char = state.characters.find(c => c.id === state.selectedCharacterId);
-            if (!char) {
-                showNotification('❌ 請先選擇角色', 'error');
-                return;
+            const lines = raw.split(/\r?\n/);
+            const newDialogue = [];
+            for(let line of lines) {
+                if(line.includes('主播:')) {
+                    const text = line.split('主播:')[1]?.trim();
+                    if(text) newDialogue.push({ characterId: host.id, characterName: host.name, text });
+                } else if(line.includes('來賓:')) {
+                    const text = line.split('來賓:')[1]?.trim();
+                    if(text) newDialogue.push({ characterId: guest.id, characterName: guest.name, text });
+                }
             }
-
-            const prompt = char.description || `anime character, ${char.name}`;
-            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512`;
-
-            char.imageUrl = imageUrl;
+            if(newDialogue.length) state.currentInterview.dialogue = newDialogue;
+            else throw new Error('解析失敗');
+            renderDialogue();
             saveDataToStorage();
-            renderCharacterList();
-            showNotification('✅ 角色圖像已生成', 'success');
-        }
-
-        function toggleCharacterEditor() {
-            showAddCharacterModal();
-        }
-
-        // ========== 數據持久化 ==========
-        function saveDataToStorage() {
-            localStorage.setItem('vtuberData', JSON.stringify({
-                characters: state.characters,
-                interview: state.currentInterview
-            }));
-        }
-
-        function loadDataFromStorage() {
-            const data = localStorage.getItem('vtuberData');
-            if (data) {
-                try {
-                    const parsed = JSON.parse(data);
-                    state.characters = parsed.characters || [];
-                    state.currentInterview = parsed.interview || state.currentInterview;
-                } catch (error) {
-                    console.error('載入數據失敗:', error);
-                }
-            }
-
-            // 如果沒有預設角色，創建示例角色
-            if (state.characters.length === 0) {
-                createDefaultCharacters();
-            }
-        }
-
-        function createDefaultCharacters() {
-            state.characters = [
-                {
-                    id: 'char_host',
-                    name: '小隻',
-                    role: 'host',
-                    description: '年輕活力的主播，充滿熱情',
-                    imageUrl: 'https://image.pollinations.ai/prompt/anime%20girl%20pink%20hair%20energetic?width=512&height=512',
-                    voiceConfig: {
-                        engine: 'google',
-                        voiceId: 'en-US-Neural2-C',
-                        language: 'zh-TW',
-                        speed: 1.2,
-                        pitch: 1.5
-                    }
-                },
-                {
-                    id: 'char_guest',
-                    name: '單單',
-                    role: 'guest',
-                    description: '沉著冷靜的來賓，經驗豐富',
-                    imageUrl: 'https://image.pollinations.ai/prompt/anime%20girl%20black%20hair%20calm?width=512&height=512',
-                    voiceConfig: {
-                        engine: 'google',
-                        voiceId: 'en-US-Neural2-A',
-                        language: 'zh-TW',
-                        speed: 1.0,
-                        pitch: 0.8
-                    }
-                }
+            showNotification('對話生成成功', 'success');
+        } catch(e) {
+            console.warn(e);
+            showNotification('AI 生成失敗，使用範例對話', 'warning');
+            state.currentInterview.dialogue = [
+                { characterId: host.id, characterName: host.name, text: `歡迎來到節目，今天來聊「${topic}」！` },
+                { characterId: guest.id, characterName: guest.name, text: `謝謝邀請，我覺得美味關鍵是火候和配料` },
+                { characterId: host.id, characterName: host.name, text: `那有推薦的私房配方嗎？` },
+                { characterId: guest.id, characterName: guest.name, text: `加一點蜂蜜和檸檬汁，層次更豐富喔` }
             ];
+            renderDialogue();
             saveDataToStorage();
         }
+    }
 
-        function updateCharacterSelects() {
-            const hostSelect = document.getElementById('hostCharacter');
-            const guestSelect = document.getElementById('guestCharacter');
-
-            const options = state.characters
-                .map(c => `<option value="${c.id}">${c.name}</option>`)
-                .join('');
-
-            hostSelect.innerHTML = options;
-            guestSelect.innerHTML = options;
-
-            if (state.characters.length > 0) {
-                hostSelect.value = state.characters[0].id;
-                guestSelect.value = state.characters.length > 1 ? state.characters[1].id : state.characters[0].id;
-            }
-        }
-
-        // ========== 匯入匯出 ==========
-        function exportData() {
-            const data = {
-                characters: state.characters,
-                interview: state.currentInterview,
-                exportDate: new Date().toISOString()
+    function createNewInterview() { state.currentInterview.dialogue = []; renderDialogue(); showNotification('新訪談已建立', 'success'); }
+    async function generateCharacterImage() {
+        const char = state.characters.find(c=>c.id===state.selectedCharacterId);
+        if(!char) { showNotification('請先點選左側角色', 'error'); return; }
+        const prompt = char.description || `${char.name} anime style character`;
+        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512`;
+        char.imageUrl = url;
+        saveDataToStorage();
+        renderCharacterList();
+        showNotification('圖像生成中，請稍等載入', 'success');
+    }
+    function exportData() {
+        const exportObj = { characters: state.characters, interview: state.currentInterview, exportDate: new Date().toISOString() };
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(exportObj,null,2)], {type:'application/json'}));
+        a.download = `vtuber_${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showNotification('匯出成功', 'success');
+    }
+    function importData() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                try {
+                    const data = JSON.parse(ev.target.result);
+                    state.characters = data.characters || [];
+                    state.currentInterview = data.interview || { dialogue: [] };
+                    saveDataToStorage();
+                    renderCharacterList();
+                    updateCharacterSelects();
+                    renderDialogue();
+                    showNotification('匯入成功', 'success');
+                } catch(err) { showNotification('匯入錯誤', 'error'); }
             };
-
-            const json = JSON.stringify(data, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `vtuber_interview_${Date.now()}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-
-            showNotification('✅ 數據已匯出', 'success');
+            reader.readAsText(file);
+        };
+        input.click();
+    }
+    function saveDataToStorage() { localStorage.setItem('vtuberInterviewData', JSON.stringify({ characters: state.characters, interview: state.currentInterview })); }
+    function loadDataFromStorage() {
+        const raw = localStorage.getItem('vtuberInterviewData');
+        if(raw) {
+            try {
+                const data = JSON.parse(raw);
+                state.characters = data.characters || [];
+                state.currentInterview = data.interview || { dialogue: [] };
+            } catch(e) {}
         }
-
-        function importData() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    try {
-                        const data = JSON.parse(event.target.result);
-                        state.characters = data.characters || [];
-                        state.currentInterview = data.interview || state.currentInterview;
-                        saveDataToStorage();
-                        renderCharacterList();
-                        updateCharacterSelects();
-                        renderDialogue();
-                        showNotification('✅ 數據已匯入', 'success');
-                    } catch (error) {
-                        showNotification('❌ 匯入失敗: ' + error.message, 'error');
-                    }
-                };
-                reader.readAsText(file);
-            };
-            input.click();
+        if(state.characters.length === 0) createDefaultCharacters();
+        updateCharacterSelects();
+        renderCharacterList();
+        renderDialogue();
+    }
+    function createDefaultCharacters() {
+        state.characters = [
+            { id: 'host_def', name: '小隻', role: 'host', description: '活潑可愛的主播', imageUrl: 'https://image.pollinations.ai/prompt/anime%20girl%20pink%20hair%20energetic', voiceConfig: { speed: 1.1, pitch: 1.3 } },
+            { id: 'guest_def', name: '單單', role: 'guest', description: '知性冷靜的來賓', imageUrl: 'https://image.pollinations.ai/prompt/anime%20girl%20black%20hair%20calm', voiceConfig: { speed: 0.9, pitch: 0.9 } }
+        ];
+        saveDataToStorage();
+    }
+    function updateCharacterSelects() {
+        const hostSel = document.getElementById('hostCharacter');
+        const guestSel = document.getElementById('guestCharacter');
+        const opts = state.characters.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+        hostSel.innerHTML = opts; guestSel.innerHTML = opts;
+        if(state.characters.length) {
+            const hostExists = state.characters.find(c=>c.role==='host');
+            const guestExists = state.characters.find(c=>c.role==='guest');
+            hostSel.value = hostExists ? hostExists.id : state.characters[0].id;
+            guestSel.value = guestExists ? guestExists.id : (state.characters[1]?.id || state.characters[0].id);
         }
+    }
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    function showNotification(msg, type='info') {
+        const div = document.createElement('div');
+        div.className = `alert ${type}`;
+        div.innerHTML = `<span>${msg}</span>`;
+        div.style.position = 'fixed'; div.style.top='20px'; div.style.right='20px'; div.style.zIndex='9999'; div.style.animation='slideIn 0.2s ease';
+        document.body.appendChild(div);
+        setTimeout(()=>{ div.style.animation='slideOut 0.2s ease'; setTimeout(()=>div.remove(),250); }, 2800);
+    }
 
-        // ========== 通知 ==========
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.className = `alert ${type}`;
-            notification.innerHTML = `<span>${message}</span>`;
-            notification.style.position = 'fixed';
-            notification.style.top = '20px';
-            notification.style.right = '20px';
-            notification.style.zIndex = '2000';
-            notification.style.maxWidth = '400px';
-            notification.style.animation = 'slideIn 0.3s ease';
-
-            document.body.appendChild(notification);
-
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-        }
-
-        // 添加動畫
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from {
-                    transform: translateX(400px);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-            @keyframes slideOut {
-                from {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-                to {
-                    transform: translateX(400px);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-    </script>
+    document.addEventListener('DOMContentLoaded', () => {
+        loadDataFromStorage();
+        if(typeof speechSynthesis !== 'undefined') getChineseVoice();
+    });
+</script>
 </body>
 </html>
