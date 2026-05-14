@@ -618,8 +618,8 @@
 
                 <div class="sidebar-section">
                     <h3>快速操作</h3>
-                    <button onclick="generateCharacterImage()" style="width: 100%; margin-bottom: 0.5rem;">生成角色圖像</button>
-                    <button class="secondary" onclick="toggleCharacterEditor()" style="width: 100%;">編輯角色</button>
+                    <button onclick="generateCharacterImage()" style="width: 100%; margin-bottom: 0.5rem;">🖼️ 生成圖像</button>
+                    <button class="secondary" onclick="toggleCharacterEditor()" style="width: 100%;">✏️ 編輯角色</button>
                 </div>
             </div>
 
@@ -758,7 +758,6 @@
         // ========== Puter.js 初始化 ==========
         async function initializePuterJS() {
             try {
-                // 檢查 Puter.js 是否已加載
                 if (typeof puter !== 'undefined') {
                     console.log('✅ Puter.js 已成功加載');
                 } else {
@@ -841,7 +840,6 @@
             updateCharacterSelects();
             closeModal('addCharacterModal');
 
-            // 清空表單
             document.getElementById('charName').value = '';
             document.getElementById('charDescription').value = '';
             document.getElementById('charImageUrl').value = '';
@@ -862,7 +860,6 @@
             document.getElementById('charSpeed').value = char.voiceConfig.speed;
             document.getElementById('charPitch').value = char.voiceConfig.pitch;
 
-            // 修改保存邏輯以更新現有角色
             const originalSaveCharacter = window.saveCharacter;
             window.saveCharacter = function() {
                 const name = document.getElementById('charName').value;
@@ -935,7 +932,6 @@
             showNotification('⏳ 正在生成對話...', 'info');
 
             try {
-                // 使用 Puter.js 生成對話
                 if (typeof puter !== 'undefined' && puter.ai && puter.ai.chat) {
                     const prompt = `你是一個訪談節目的編劇。請為以下訪談生成一段有趣的對話。
                     
@@ -955,7 +951,6 @@
                         temperature: 0.7
                     });
 
-                    // 解析對話
                     const lines = response.split('\n').filter(line => line.trim());
                     state.currentInterview.dialogue = [];
 
@@ -980,7 +975,6 @@
                     renderDialogue();
                     showNotification('✅ 對話已生成', 'success');
                 } else {
-                    // 如果 Puter.js 不可用，使用示例對話
                     generateSampleDialogue(hostId, guestId, host.name, guest.name);
                 }
             } catch (error) {
@@ -1115,7 +1109,6 @@
                 // 優先嘗試使用 Puter.js
                 if (typeof puter !== 'undefined' && puter.ai && puter.ai.txt2speech) {
                     try {
-                        // 使用簡化的參數格式
                         const audioUrl = await puter.ai.txt2speech(item.text, {
                             voice: character.voiceConfig.voiceId
                         });
@@ -1154,7 +1147,6 @@
                     utterance.pitch = character.voiceConfig.pitch || 1.0;
                     utterance.volume = 1.0;
 
-                    // 創建一個虛擬音頻 URL（用於標記已合成）
                     state.currentInterview.dialogue[index].voiceUrl = `web-speech://${index}`;
                     state.currentInterview.dialogue[index].utterance = utterance;
                     renderDialogue();
@@ -1174,7 +1166,7 @@
                 try {
                     await synthesizeSpeech(i);
                     successCount++;
-                    await new Promise(resolve => setTimeout(resolve, 500)); // 避免 API 限制
+                    await new Promise(resolve => setTimeout(resolve, 500));
                 } catch (error) {
                     console.error(`合成第 ${i + 1} 句語音失敗:`, error);
                 }
@@ -1190,14 +1182,12 @@
                 return;
             }
 
-            // 如果是 Web Speech API 合成的語音
             if (item.voiceUrl.startsWith('web-speech://') && item.utterance) {
                 speechSynthesis.cancel();
                 speechSynthesis.speak(item.utterance);
                 return;
             }
 
-            // 否則使用 Audio API 播放
             const audio = new Audio(item.voiceUrl);
             audio.play().catch(error => {
                 console.error('播放失敗:', error);
@@ -1232,7 +1222,6 @@
                 return;
             }
 
-            // 如果是 Web Speech API 合成的語音
             if (item.voiceUrl.startsWith('web-speech://') && item.utterance) {
                 speechSynthesis.cancel();
                 const utterance = item.utterance;
@@ -1241,29 +1230,6 @@
                     setTimeout(playNextAudio, 300);
                 };
                 speechSynthesis.speak(utterance);
-                return;
-            }
-
-            // 否則使用 Audio API 播放
-            const audio = new Audio(item.voiceUrl);
-            audio.onended = () => {
-                state.currentAudioIndex++;
-                setTimeout(playNextAudio, 300);
-            };
-
-            audio.play().catch(error => {
-                console.error('播放失敗:', error);
-                state.currentAudioIndex++;
-                setTimeout(playNextAudio, 100);
-            });
-        }
-
-            const item = state.currentInterview.dialogue[state.currentAudioIndex];
-            updatePlayerStatus();
-
-            if (!item.voiceUrl) {
-                state.currentAudioIndex++;
-                setTimeout(playNextAudio, 100);
                 return;
             }
 
@@ -1304,6 +1270,7 @@
                 return;
             }
 
+            showNotification('⏳ 正在生成圖像...', 'info');
             const prompt = char.description || `anime character, ${char.name}`;
             const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512`;
 
@@ -1337,7 +1304,6 @@
                 }
             }
 
-            // 如果沒有預設角色，創建示例角色
             if (state.characters.length === 0) {
                 createDefaultCharacters();
             }
@@ -1462,7 +1428,6 @@
             }, 3000);
         }
 
-        // 添加動畫
         const style = document.createElement('style');
         style.textContent = `
             @keyframes slideIn {
