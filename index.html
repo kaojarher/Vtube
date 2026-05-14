@@ -877,10 +877,15 @@
         try {
             let raw = '';
             if(typeof puter !== 'undefined' && puter.ai && puter.ai.chat) {
-                // 靜默模式：直接呼叫 AI，不主動觸發登入視窗
-                // Puter 匿名狀態也可使用，配額不足時會自動彈出登入（由 Puter 內部處理）
                 const prompt = `主題:${topic}\n主播:${host.name}(${host.description||''})\n來賓:${guest.name}(${guest.description||''})\n請產出4~6句訪談對話，格式每行開頭為「主播:」或「來賓:」，內容生動自然。使用繁體中文。`;
-                const resp = await puter.ai.chat(prompt, { model: 'anthropic/claude-3.5-haiku' });
+                // 加入 20 秒 timeout，避免 Puter 登入驗證卡住整個頁面
+                const chatTimeout = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('puter chat timeout')), 20000)
+                );
+                const resp = await Promise.race([
+                    puter.ai.chat(prompt, { model: 'claude-3-5-haiku' }),
+                    chatTimeout
+                ]);
                 // 解析 Puter 回傳格式（可能是字串或物件）
                 if (typeof resp === 'string') raw = resp;
                 else if (resp?.message?.content) {
@@ -1014,7 +1019,6 @@
         loadDataFromStorage();
         if(typeof speechSynthesis !== 'undefined') getChineseVoice();
     });
-</script>
 
     // ── Puter 登入初始化 ─────────────────────────────────────
     async function initPuter() {
@@ -1026,19 +1030,30 @@
                 badge.className = 'puter-badge warn';
                 return;
             }
-            // 靜默模式：只檢查狀態，不主動呼叫 signIn()
-            // 若已登入（例如在 puter.com 登入過）就顯示帳號；否則顯示「就緒」
-            // AI 呼叫會由 Puter 自行決定是否彈出登入視窗
+            // 使用 Promise.race 加入 3 秒 timeout，避免跨域 iframe 永久卡住
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('timeout')), 3000)
+            );
             let signedIn = false;
-            try { signedIn = puter.auth.isSignedIn(); } catch(e) {}
+            try {
+                signedIn = await Promise.race([
+                    Promise.resolve(puter.auth.isSignedIn()),
+                    timeoutPromise
+                ]);
+            } catch(e) { signedIn = false; }
+
             if (signedIn) {
                 let user = null;
-                try { user = await puter.auth.getUser(); } catch(e) {}
+                try {
+                    user = await Promise.race([
+                        puter.auth.getUser(),
+                        new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 3000))
+                    ]);
+                } catch(e) {}
                 badge.textContent = user?.username ? `✓ ${user.username}` : '✓ 已登入';
                 badge.className = 'puter-badge ok';
                 freeTag.textContent = '免費 AI · Puter 帳號';
             } else {
-                // 匿名也可以用，顯示「就緒」而不是「未登入」，避免誤導
                 badge.textContent = '✓ 就緒';
                 badge.className = 'puter-badge ok';
                 freeTag.textContent = '免費 AI · 點擊「生成對話」即可使用';
@@ -1049,11 +1064,22 @@
         }
     }
 
-    // 頁面載入後初始化 Puter 狀態
+    // 頁面載入後初始化 Puter 狀態（加入 SDK 載入等待）
     window.addEventListener('load', () => {
-        if (typeof puter !== 'undefined') {
-            initPuter();
-        }
+        // 等待 puter SDK 完成初始化，最多重試 10 次（每次 500ms）
+        let retries = 0;
+        const waitForPuter = setInterval(() => {
+            retries++;
+            if (typeof puter !== 'undefined') {
+                clearInterval(waitForPuter);
+                initPuter();
+            } else if (retries >= 10) {
+                clearInterval(waitForPuter);
+                const badge = document.getElementById('puterBadge');
+                if (badge) { badge.textContent = 'SDK 載入失敗'; badge.className = 'puter-badge warn'; }
+            }
+        }, 500);
     });
+</script>
 </body>
 </html>
