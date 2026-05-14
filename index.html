@@ -400,6 +400,28 @@
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(400px); opacity: 0; }
         }
+
+        /* Puter 登入狀態列 */
+        .puter-bar {
+            display: flex; align-items: center; gap: 8px;
+            padding: 4px 16px;
+            background: rgba(0,0,0,0.25);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-size: 0.72rem; color: #94a3b8;
+            flex-shrink: 0;
+        }
+        .puter-badge {
+            padding: 2px 10px; border-radius: 20px; font-size: 0.68rem; font-weight: 600;
+        }
+        .puter-badge.ok   { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+        .puter-badge.warn { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+        .puter-login-btn {
+            padding: 3px 12px; border-radius: 20px; border: none; cursor: pointer;
+            background: linear-gradient(90deg, #6366f1, #ec4899);
+            color: white; font-size: 0.68rem; font-weight: 600;
+            transition: opacity 0.2s;
+        }
+        .puter-login-btn:hover { opacity: 0.85; }
     </style>
 </head>
 <body>
@@ -413,6 +435,14 @@
         </div>
     </div>
 
+
+    <!-- Puter 登入狀態列 -->
+    <div class="puter-bar">
+        <span>🤖 AI 狀態：</span>
+        <span class="puter-badge warn" id="puterBadge">初始化中…</span>
+        <button class="puter-login-btn" id="puterLoginBtn" onclick="puterSignIn()" style="display:none">登入 Puter 解鎖 AI</button>
+        <span id="puterFreeTag" style="color:#64748b;">免費 · 無需 API Key</span>
+    </div>
     <div class="main-content">
         <div class="sidebar">
             <div class="sidebar-section">
@@ -848,9 +878,20 @@
         try {
             let raw = '';
             if(typeof puter !== 'undefined' && puter.ai && puter.ai.chat) {
-                const prompt = `主題:${topic}\n主播:${host.name}(${host.description||''})\n來賓:${guest.name}(${guest.description||''})\n請產出4~6句訪談對話，格式每行開頭為「主播:」或「來賓:」，內容生動自然。`;
-                const resp = await puter.ai.chat(prompt, { model: 'gpt-3.5-turbo', temperature: 0.7 });
-                raw = resp;
+                // 若未登入，觸發 Puter 登入視窗
+                if(!puter.auth.isSignedIn()) {
+                    try { await puter.auth.signIn(); } catch(e) { throw new Error('請先登入 Puter'); }
+                }
+                const prompt = `主題:${topic}\n主播:${host.name}(${host.description||''})\n來賓:${guest.name}(${guest.description||''})\n請產出4~6句訪談對話，格式每行開頭為「主播:」或「來賓:」，內容生動自然。使用繁體中文。`;
+                const resp = await puter.ai.chat(prompt, { model: 'anthropic/claude-3.5-haiku' });
+                // 解析 Puter 回傳格式（可能是字串或物件）
+                if (typeof resp === 'string') raw = resp;
+                else if (resp?.message?.content) {
+                    const c = resp.message.content;
+                    raw = typeof c === 'string' ? c : (Array.isArray(c) ? c.map(b=>b.text||'').join('') : '');
+                } else if (Array.isArray(resp?.content)) {
+                    raw = resp.content.map(b=>b.text||'').join('');
+                } else if (resp?.text) { raw = resp.text; }
             } else {
                 raw = `主播: 今天來聊聊「${topic}」，你覺得怎樣最好吃？\n來賓: 我覺得關鍵在於仙草要Q彈，搭配芋圓和紅豆！\n主播: 原來如此，那糖水的比例呢？\n來賓: 糖水不能太甜，帶點焦香更完美～`;
             }
@@ -977,5 +1018,54 @@
         if(typeof speechSynthesis !== 'undefined') getChineseVoice();
     });
 </script>
+
+    // ── Puter 登入初始化 ─────────────────────────────────────
+    async function initPuter() {
+        const badge    = document.getElementById('puterBadge');
+        const loginBtn = document.getElementById('puterLoginBtn');
+        const freeTag  = document.getElementById('puterFreeTag');
+        try {
+            if (typeof puter === 'undefined') {
+                badge.textContent = '載入失敗';
+                badge.className = 'puter-badge warn';
+                loginBtn.style.display = 'none';
+                return;
+            }
+            const signedIn = puter.auth.isSignedIn();
+            if (signedIn) {
+                let user = null;
+                try { user = await puter.auth.getUser(); } catch(e) {}
+                badge.textContent = user?.username ? `✓ ${user.username}` : '✓ 已登入';
+                badge.className = 'puter-badge ok';
+                loginBtn.style.display = 'none';
+                freeTag.textContent = '免費 AI · Puter 帳號';
+            } else {
+                badge.textContent = '未登入';
+                badge.className = 'puter-badge warn';
+                loginBtn.style.display = '';
+                freeTag.textContent = '登入後可使用 AI 生成對話';
+            }
+        } catch(e) {
+            badge.textContent = '就緒';
+            badge.className = 'puter-badge ok';
+            loginBtn.style.display = 'none';
+        }
+    }
+
+    async function puterSignIn() {
+        try {
+            await puter.auth.signIn();
+            initPuter();
+        } catch(e) {
+            showNotification('登入取消', 'warning');
+        }
+    }
+
+    // 頁面載入後初始化 Puter 狀態
+    window.addEventListener('load', () => {
+        if (typeof puter !== 'undefined') {
+            initPuter();
+        }
+    });
 </body>
 </html>
