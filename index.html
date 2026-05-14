@@ -865,67 +865,144 @@
     }
 
     // AI 生成對話 (保留 AI 生成能力，優先 puter)
-    async function generateDialogue() {
-        const topic = document.getElementById('interviewTopic').value;
-        const hostId = document.getElementById('hostCharacter').value;
-        const guestId = document.getElementById('guestCharacter').value;
-        if(!hostId || !guestId) { showNotification('請選擇主播與來賓', 'error'); return; }
-        const host = state.characters.find(c=>c.id===hostId);
-        const guest = state.characters.find(c=>c.id===guestId);
-        if(!host||!guest) return;
-        showNotification('AI 生成對話中...', 'info');
-        try {
-            let raw = '';
-            if(typeof puter !== 'undefined' && puter.ai && puter.ai.chat) {
-                const prompt = `主題:${topic}\n主播:${host.name}(${host.description||''})\n來賓:${guest.name}(${guest.description||''})\n請產出4~6句訪談對話，格式每行開頭為「主播:」或「來賓:」，內容生動自然。使用繁體中文。`;
-                // 加入 20 秒 timeout，避免 Puter 登入驗證卡住整個頁面
-                const chatTimeout = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('puter chat timeout')), 20000)
-                );
-                const resp = await Promise.race([
-                    puter.ai.chat(prompt, { model: 'claude-3-5-haiku' }),
-                    chatTimeout
-                ]);
-                // 解析 Puter 回傳格式（可能是字串或物件）
-                if (typeof resp === 'string') raw = resp;
-                else if (resp?.message?.content) {
-                    const c = resp.message.content;
-                    raw = typeof c === 'string' ? c : (Array.isArray(c) ? c.map(b=>b.text||'').join('') : '');
-                } else if (Array.isArray(resp?.content)) {
-                    raw = resp.content.map(b=>b.text||'').join('');
-                } else if (resp?.text) { raw = resp.text; }
-            } else {
-                raw = `主播: 今天來聊聊「${topic}」，你覺得怎樣最好吃？\n來賓: 我覺得關鍵在於仙草要Q彈，搭配芋圓和紅豆！\n主播: 原來如此，那糖水的比例呢？\n來賓: 糖水不能太甜，帶點焦香更完美～`;
-            }
-            const lines = raw.split(/\r?\n/);
-            const newDialogue = [];
-            for(let line of lines) {
-                if(line.includes('主播:')) {
-                    const text = line.split('主播:')[1]?.trim();
-                    if(text) newDialogue.push({ characterId: host.id, characterName: host.name, text });
-                } else if(line.includes('來賓:')) {
-                    const text = line.split('來賓:')[1]?.trim();
-                    if(text) newDialogue.push({ characterId: guest.id, characterName: guest.name, text });
-                }
-            }
-            if(newDialogue.length) state.currentInterview.dialogue = newDialogue;
-            else throw new Error('解析失敗');
-            renderDialogue();
-            saveDataToStorage();
-            showNotification('對話生成成功', 'success');
-        } catch(e) {
-            console.warn(e);
-            showNotification('AI 生成失敗，使用範例對話', 'warning');
-            state.currentInterview.dialogue = [
-                { characterId: host.id, characterName: host.name, text: `歡迎來到節目，今天來聊「${topic}」！` },
-                { characterId: guest.id, characterName: guest.name, text: `謝謝邀請，我覺得美味關鍵是火候和配料` },
-                { characterId: host.id, characterName: host.name, text: `那有推薦的私房配方嗎？` },
-                { characterId: guest.id, characterName: guest.name, text: `加一點蜂蜜和檸檬汁，層次更豐富喔` }
-            ];
-            renderDialogue();
-            saveDataToStorage();
-        }
+    
+async function generateDialogue() {
+
+    const topic = document.getElementById('interviewTopic').value.trim();
+
+    const hostId = document.getElementById('hostCharacter').value;
+
+    const guestId = document.getElementById('guestCharacter').value;
+
+    if (!hostId || !guestId) {
+        showNotification('請選擇主播與來賓', 'error');
+        return;
     }
+
+    const host = state.characters.find(c => c.id === hostId);
+    const guest = state.characters.find(c => c.id === guestId);
+
+    updatePlayerStatus('AI 生成中...', true);
+
+    try {
+
+        if (typeof puter === 'undefined') {
+            throw new Error('Puter 未載入');
+        }
+
+        const prompt = `
+請使用繁體中文。
+
+主題：${topic}
+
+主播：${host.name}
+來賓：${guest.name}
+
+請生成 6 段自然訪談。
+
+格式：
+
+主播: 內容
+來賓: 內容
+`;
+
+        let raw = '';
+
+        const response = await puter.ai.chat(prompt, {
+            model: 'gpt-4o-mini'
+        });
+
+        console.log(response);
+
+        if (typeof response === 'string') {
+            raw = response;
+        }
+
+        else if (response?.choices?.[0]?.message?.content) {
+            raw = response.choices[0].message.content;
+        }
+
+        else if (response?.message?.content) {
+
+            if (typeof response.message.content === 'string') {
+                raw = response.message.content;
+            }
+
+            else if (Array.isArray(response.message.content)) {
+                raw = response.message.content
+                    .map(x => x.text || '')
+                    .join('');
+            }
+        }
+
+        else if (response?.text) {
+            raw = response.text;
+        }
+
+        else if (Array.isArray(response?.content)) {
+            raw = response.content
+                .map(x => x.text || '')
+                .join('');
+        }
+
+        if (!raw) {
+            throw new Error('AI 無內容');
+        }
+
+        const lines = raw
+            .split(/\r?\n/)
+            .map(x => x.trim())
+            .filter(x => x);
+
+        const newDialogue = [];
+
+        for (const line of lines) {
+
+            if (line.startsWith('主播:')) {
+
+                newDialogue.push({
+                    characterId: host.id,
+                    characterName: host.name,
+                    text: line.replace('主播:', '').trim()
+                });
+            }
+
+            else if (line.startsWith('來賓:')) {
+
+                newDialogue.push({
+                    characterId: guest.id,
+                    characterName: guest.name,
+                    text: line.replace('來賓:', '').trim()
+                });
+            }
+        }
+
+        if (newDialogue.length === 0) {
+            throw new Error('解析失敗');
+        }
+
+        state.currentInterview.dialogue = newDialogue;
+
+        renderDialogue();
+
+        saveDataToStorage();
+
+        updatePlayerStatus('AI 完成', false);
+
+        showNotification('AI 對話生成成功', 'success');
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        showNotification('AI 生成失敗', 'error');
+
+        updatePlayerStatus('AI 失敗', false);
+    }
+}
+
 
     function createNewInterview() { state.currentInterview.dialogue = []; renderDialogue(); showNotification('新訪談已建立', 'success'); }
     async function generateCharacterImage() {
@@ -1065,14 +1142,16 @@
     }
 
     // 頁面載入後初始化 Puter 狀態（加入 SDK 載入等待）
-    window.addEventListener('load', () => {
+    window.addEventListener('load', async () => {
         // 等待 puter SDK 完成初始化，最多重試 10 次（每次 500ms）
         let retries = 0;
         const waitForPuter = setInterval(() => {
             retries++;
             if (typeof puter !== 'undefined') {
                 clearInterval(waitForPuter);
+                setTimeout(() => {
                 initPuter();
+            }, 1500);
             } else if (retries >= 10) {
                 clearInterval(waitForPuter);
                 const badge = document.getElementById('puterBadge');
