@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VTuber 影音同步合成工具</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            padding: 40px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 { color: #2c3e50; text-align: center; }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h2 { margin-top: 0; color: #34495e; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+        button:hover { background-color: #2980b9; }
+        button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        .btn-record { background-color: #e74c3c; }
+        .btn-record:hover { background-color: #c0392b; }
+        .btn-stop { background-color: #f39c12; }
+        .btn-stop:hover { background-color: #d35400; }
+        .btn-merge { background-color: #2ecc71; }
+        .btn-merge:hover { background-color: #27ae60; }
+        .status { font-weight: bold; margin-top: 15px; color: #7f8c8d; }
+        input[type="file"] { margin-top: 10px; display: block; }
+        video { width: 100%; max-height: 400px; margin-top: 15px; border-radius: 6px; background: #000; }
+    </style>
+</head>
+<body>
+
+    <h1>VTuber 影音同步合成工具</h1>
+    <p style="text-align: center; color: #7f8c8d;">專為解決網頁錄影無聲設計的純前端轉檔方案</p>
+
+    <!-- 第一步：錄製聲音 -->
+    <div class="card">
+        <h2>第一步：錄製麥克風聲音</h2>
+        <p>在開始進行 VTuber 演出前，點擊下方按鈕開始錄音（請與您的 VTuber 錄影同時開始）。</p>
+        <button id="startAudio" class="btn-record">開始錄音</button>
+        <button id="stopAudio" class="btn-stop" disabled>結束錄音</button>
+        <div id="audioStatus" class="status">狀態：等待錄音...</div>
+    </div>
+
+    <!-- 第二步：上傳影片 -->
+    <div class="card">
+        <h2>第二步：上傳無聲 WebM 影片</h2>
+        <p>請選擇從 VTuber 網站下載下來的 <code>.webm</code> 影片檔案。</p>
+        <input type="file" id="videoUpload" accept="video/webm">
+        <video id="previewVideo" controls style="display:none;"></video>
+    </div>
+
+    <!-- 第三步：合成導出 -->
+    <div class="card">
+        <h2>第三步：影音同步合成</h2>
+        <p>系統將會以自動同步的方式，將錄好的音訊與影片結合成全新的有聲影片。</p>
+        <button id="mergeBtn" class="btn-merge" disabled>開始合成有聲影片</button>
+        <div id="mergeStatus" class="status">狀態：等待檔案準備就緒...</div>
+        <div id="downloadArea" style="margin-top: 15px;"></div>
+    </div>
+
+    <script>
+        let audioRecorder;
+        let audioChunks = [];
+        let audioBlob;
+        let audioUrl;
+        let videoBlob;
+
+        const startAudioBtn = document.getElementById('startAudio');
+        const stopAudioBtn = document.getElementById('stopAudio');
+        const audioStatus = document.getElementById('audioStatus');
+        const videoUpload = document.getElementById('videoUpload');
+        const previewVideo = document.getElementById('previewVideo');
+        const mergeBtn = document.getElementById('mergeBtn');
+        const mergeStatus = document.getElementById('mergeStatus');
+        const downloadArea = document.getElementById('downloadArea');
+
+        // 1. 錄音邏輯
+        startAudioBtn.addEventListener('click', async () => {
+            audioChunks = [];
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioRecorder = new MediaRecorder(stream);
+                audioRecorder.ondataavailable = e => audioChunks.push(e.data);
+                audioRecorder.onstop = () => {
+                    audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                    audioUrl = URL.createObjectURL(audioBlob);
+                    audioStatus.innerText = "狀態：錄音完成！音訊已暫存。";
+                    checkReadyToMerge();
+                };
+                audioRecorder.start();
+                startAudioBtn.disabled = true;
+                stopAudioBtn.disabled = false;
+                audioStatus.innerText = "狀態：🔴 正在錄音中... 請切換到 VTuber 視窗同步開始錄影！";
+            } catch (err) {
+                audioStatus.innerText = "失敗：無法取得麥克風權限。" + err;
+            }
+        });
+
+        stopAudioBtn.addEventListener('click', () => {
+            audioRecorder.stop();
+            audioRecorder.stream.getTracks().forEach(track => track.stop()); // 關閉麥克風
+            startAudioBtn.disabled = false;
+            stopAudioBtn.disabled = true;
+        });
+
+        // 2. 影片上傳處理
+        videoUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                videoBlob = file;
+                previewVideo.src = URL.createObjectURL(file);
+                previewVideo.style.display = "block";
+                checkReadyToMerge();
+            }
+        });
+
+        // 檢查是否可以開始合成
+        function checkReadyToMerge() {
+            if (audioBlob && videoBlob) {
+                mergeBtn.disabled = false;
+                mergeStatus.innerText = "狀態：條件已滿足，隨時可以開始合成！";
+            }
+        }
+
+        // 3. 核心合成邏輯 (Muxing)
+        mergeBtn.addEventListener('click', async () => {
+            mergeBtn.disabled = true;
+            mergeStatus.innerText = "狀態：正在進行高速影音軌道合成，請稍候...";
+            downloadArea.innerHTML = "";
+
+            try {
+                // 建立隱藏的影音播放元素用於混合軌道
+                const playVideo = document.createElement('video');
+                playVideo.src = previewVideo.src;
+                playVideo.muted = true; // 避免合成時發出雙重聲音
+
+                const playAudio = new Audio();
+                playAudio.src = audioUrl;
+
+                // 確保影片與音訊加載完成
+                await Promise.all([
+                    new Promise(r => playVideo.onloadedmetadata = r),
+                    new Promise(r => playAudio.onloadedmetadata = r)
+                ]);
+
+                // 建立 Web Audio API 節點來擷取音訊軌
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioCtx.createMediaElementSource(playAudio);
+                const dest = audioCtx.createMediaStreamDestination();
+                source.connect(dest);
+
+                // 擷取影片的影像軌 (利用 captureStream)
+                const videoStream = playVideo.captureStream ? playVideo.captureStream() : playVideo.mozCaptureStream();
+                
+                // 混合影像軌與錄製的音訊軌
+                const outputStream = new MediaStream();
+                videoStream.getVideoTracks().forEach(track => outputStream.addTrack(track));
+                dest.stream.getAudioTracks().forEach(track => outputStream.addTrack(track));
+
+                // 建立新的 MediaRecorder 輸出內含聲音的 WebM
+                const finalChunks = [];
+                const finalRecorder = new MediaRecorder(outputStream, {
+                    mimeType: 'video/webm;codecs=vp9,opus'
+                });
+
+                finalRecorder.ondataavailable = e => finalChunks.push(e.data);
+                finalRecorder.onstop = () => {
+                    const finalBlob = new Blob(finalChunks, { type: 'video/webm' });
+                    const finalUrl = URL.createObjectURL(finalBlob);
+                    
+                    // 生成下載連結
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = finalUrl;
+                    downloadLink.download = `VTuber_Combined_${Date.now()}.webm`;
+                    downloadLink.innerHTML = `<button style="background-color:#9b59b6;">點此下載最終有聲影片 (.webm)</button>`;
+                    downloadArea.appendChild(downloadLink);
+                    
+                    mergeStatus.innerText = "狀態：🎉 合成成功！請點擊下方按鈕下載。";
+                    mergeBtn.disabled = false;
+                };
+
+                // 同步啟動錄製與播放
+                finalRecorder.start();
+                playVideo.play();
+                playAudio.play();
+
+                // 影片播放結束時自動停止錄製
+                playVideo.onended = () => {
+                    finalRecorder.stop();
+                    audioCtx.close();
+                };
+
+            } catch (error) {
+                mergeStatus.innerText = "合成失敗：" + error.message;
+                mergeBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
