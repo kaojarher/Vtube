@@ -1,0 +1,142 @@
+{
+  "characters": [
+    {
+      "id": "host_def",
+      "name": "小隻",
+      "role": "host",
+      "description": "活潑可愛的主播",
+      "imageUrl": "https://image.pollinations.ai/prompt/anime%20girl%20pink%20hair%20energetic",
+      "voiceConfig": {
+        "speed": 1.1,
+        "pitch": 1.3
+      }
+    },
+    {
+      "id": "guest_def",
+      "name": "單單",
+      "role": "guest",
+      "description": "知性冷靜的來賓",
+      "imageUrl": "https://image.pollinations.ai/prompt/anime%20girl%20black%20hair%20calm",
+      "voiceConfig": {
+        "speed": 0.9,
+        "pitch": 0.9
+      }
+    }
+  ],
+  "interview": {
+    "title": "拯救螢幕眼！30分鐘護眼大作戰",
+    "dialogue": [
+      {
+        "characterId": "host_def",
+        "characterName": "小隻",
+        "text": "大家好，歡迎收聽今天的節目。我是小隻，今天我們要來聊聊眼睛的保養。眼睛是我們最重要的感官之一，對於生活的影響非常大。今天的來賓是單單，她在眼部護理方面有豐富的經驗，讓我們一起來聽聽她的看法。單單，您好！"
+      },
+      {
+        "characterId": "guest_def",
+        "characterName": "單單",
+        "text": "嗨，小隻，大家好！很高興能在這裡與大家分享眼睛保養的一些知識。"
+      },
+      {
+        "characterId": "host_def",
+        "characterName": "小隻",
+        "text": "首先，為什麼眼睛的保養這麼重要呢？能不能跟我們分享一下？"
+      },
+      {
+        "characterId": "guest_def",
+        "characterName": "單單",
+        "text": "當然！眼睛是我們直接與外界交流的窗口，而在這個科技發達的時代，使用電子產品的時間越來越長，很多人都會感受到眼睛乾澀、疲勞等問題。好的眼部護理可以減少這些不適，並且長期保持眼睛的健康。"
+      },
+      {
+        "characterId": "host_def",
+        "characterName": "小隻",
+        "text": "那麼，日常生活中，我們可以採取哪些簡單的方法來保護眼睛呢？"
+      },
+      {
+        "characterId": "guest_def",
+        "characterName": "單單",
+        "text": "日常生活中，有幾個簡單的方法可以幫助保護眼睛。首先，保持適當的用眼距離，尤其是在使用電腦或手機的時候，建議每隔一小時休息一下，進行眼部運動。其次，適度使用眼藥水，保濕眼睛也是很重要的。"
+      },
+      {
+        "characterId": "host_def",
+        "characterName": "小隻",
+        "text": "你提到的眼部運動是什麼呢？"
+      },
+      {
+        "characterId": "guest_def",
+        "characterName": "單單",
+        "text": "眼部運動其實很簡單，比如你可以閉上眼睛，然後輕輕轉動眼球，或者用手指輕壓眼眶周圍，促進血液循環。這些都是能讓眼睛感覺更加舒適的方法。"
+      },
+      {
+        "characterId": "host_def",
+        "characterName": "小隻",
+        "text": "除了運動，飲食對眼睛的健康影響大嗎？"
+      },
+      {
+        "characterId": "guest_def",
+        "characterName": "單單",
+        "text": "影響非常大！有些食物富含對眼睛有益的營養素，例如富含維生素A的胡蘿蔔、含有Omega-3脂肪酸的魚類，還有綠葉蔬菜中的葉黃素，這些都有助於保護視力。"
+      },
+      {
+        "characterId": "host_def",
+        "characterName": "小隻",
+        "text": "這樣聽來，獲取足夠的營養真的很重要。那麼，還有其他的護眼習慣嗎？"
+      },
+      {
+        "characterId": "guest_def",
+        "characterName": "單單",
+        "text": "沒錯，還有一些習慣，比如保持良好的作息時間，不要熬夜，因為睡眠不足會加重眼睛的疲勞。此外，也要注意環境的光線，過於昏暗或刺眼的光線都會對眼睛造成傷害。"
+      },
+      {
+        "characterId": "host_def",
+        "characterName": "小隻",
+        "text": "確實，光線的問題常常被忽視。說到環境，使用電子產品的時候，有沒有特別的護眼措施？"
+      },
+      {
+        "characterId": "guest_def",
+        "characterName": "單單",
+        "text": "有的！最近很多人使用藍光過濾眼鏡，能夠減少藍光對眼睛的傷害。此外，調整屏幕的亮度和對比度，也能減少眼睛的負擔。另外，選擇抗藍光的手機或電腦配件也是好選擇。"
+      },
+      {
+        "characterId": "host_def",
+        "characterName": "小隻",
+        "text": "聽起來非常實用！那如果眼睛已經有不適的情況，應該怎麼辦呢？"
+      },
+      {
+        "characterId": "guest_def",
+        "characterName": "單單",
+        "text": "如果眼睛出現不適，例如嚴重乾澀或視力模糊，建議儘快就醫，尋求專業的眼科醫生的建議。同時，平時可以使用一些適合的眼藥水來緩解不適。"
+      },
+      {
+        "characterId": "host_def",
+        "characterName": "小隻",
+        "text": "有些人可能會有隱形眼鏡的使用習慣，這對眼睛的影響怎麼樣？"
+      },
+      {
+        "characterId": "guest_def",
+        "characterName": "單單",
+        "text": "隱形眼鏡確實方便，但使用不當會導致眼睛感染或乾燥。建議隱形眼鏡使用者要定期更換鏡片，保持眼睛的清潔，避免在游泳或長時間佩戴時出現問題。"
+      },
+      {
+        "characterId": "host_def",
+        "characterName": "小隻",
+        "text": "提醒得很好！最後，單單對於眼睛保養，有沒有一些常見的誤解需要澄清的呢？"
+      },
+      {
+        "characterId": "guest_def",
+        "characterName": "單單",
+        "text": "當然，有人總是認為只要年輕就不需要關心眼睛，其實這是錯誤的想法。眼睛的健康要從年輕時開始重視，定期檢查視力和養成良好的生活習慣，才能讓眼睛在未來也能健康明亮。"
+      },
+      {
+        "characterId": "host_def",
+        "characterName": "小隻",
+        "text": "非常感謝單單的分享，眼睛健康可以從現在做起！今天的節目就到這裡，如果大家還有疑問，歡迎在下方留言，我們下次再見！"
+      },
+      {
+        "characterId": "guest_def",
+        "characterName": "單單",
+        "text": "謝謝大家的收聽，祝大家擁有健康的眼睛！再見！"
+      }
+    ]
+  },
+  "exportDate": "2026-05-15T04:07:53.736Z"
+}
