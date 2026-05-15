@@ -401,6 +401,115 @@
             to { transform: translateX(400px); opacity: 0; }
         }
 
+        /* ══════ VTuber Stage Styles ══════ */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+        /* 待機：緩慢呼吸漂浮，4秒週期 */
+        @keyframes vtb-idle {
+            0%,100% { transform: translateY(0px)   scaleX(var(--sx,1)) rotate(0deg); }
+            30%     { transform: translateY(-4px)   scaleX(var(--sx,1)) rotate(0.3deg); }
+            60%     { transform: translateY(-2px)   scaleX(var(--sx,1)) rotate(-0.2deg); }
+        }
+        /* 說話：小幅度有機搖晃，模擬頭部說話微動 */
+        @keyframes vtb-speak {
+            0%   { transform: translateY(0px)  scaleX(var(--sx,1)) rotate(0deg); }
+            15%  { transform: translateY(-2px) scaleX(var(--sx,1)) rotate(0.4deg); }
+            30%  { transform: translateY(-1px) scaleX(var(--sx,1)) rotate(-0.3deg); }
+            45%  { transform: translateY(-3px) scaleX(var(--sx,1)) rotate(0.5deg); }
+            60%  { transform: translateY(-1px) scaleX(var(--sx,1)) rotate(-0.2deg); }
+            75%  { transform: translateY(-2px) scaleX(var(--sx,1)) rotate(0.3deg); }
+            100% { transform: translateY(0px)  scaleX(var(--sx,1)) rotate(0deg); }
+        }
+        @keyframes vtb-subtitle-in {
+            from { opacity:0; transform:translateY(10px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+        @keyframes vtb-glow-pulse {
+            0%,100% { box-shadow:0 0 30px rgba(99,102,241,0.6); }
+            50%     { box-shadow:0 0 60px rgba(99,102,241,1), 0 0 100px rgba(99,102,241,0.4); }
+        }
+        @keyframes vtb-glow-pulse-pink {
+            0%,100% { box-shadow:0 0 30px rgba(236,72,153,0.6); }
+            50%     { box-shadow:0 0 60px rgba(236,72,153,1), 0 0 100px rgba(236,72,153,0.4); }
+        }
+
+        .vtb-char-wrap {
+            display:flex; flex-direction:column; align-items:center;
+            position:relative; cursor:default;
+            transition: filter 0.6s cubic-bezier(0.4,0,0.2,1),
+                        transform 0.6s cubic-bezier(0.4,0,0.2,1);
+        }
+        .vtb-char-wrap.dimmed {
+            filter: brightness(0.28) saturate(0.3);
+            transform: scale(0.95);
+        }
+        .vtb-char-wrap.speaking {
+            filter: brightness(1.1) saturate(1.2) drop-shadow(0 0 20px currentColor);
+            transform: scale(1.04);
+        }
+        .vtb-char-img {
+            width: 520px; height: 840px;
+            object-fit: contain; object-position: bottom center;
+            border-radius: 0;
+            animation: vtb-idle 4s ease-in-out infinite;
+            --sx: 1;
+            image-rendering: crisp-edges;
+            filter: drop-shadow(0 10px 40px rgba(0,0,0,0.7));
+        }
+        .vtb-char-img.speaking-anim {
+            animation: vtb-speak 1.2s ease-in-out infinite;
+        }
+        .vtb-char-img.idle-anim {
+            animation: vtb-idle 4s ease-in-out infinite;
+        }
+        .vtb-char-label {
+            font-family:'Noto Sans TC',sans-serif;
+            font-size:0.78rem; font-weight:700; letter-spacing:0.12em;
+            padding:4px 16px; border-radius:20px; margin-top:10px;
+            transition:all 0.5s ease; opacity:0.5;
+            border:1px solid transparent;
+        }
+        .vtb-char-wrap.speaking .vtb-char-label {
+            opacity:1;
+        }
+        .vtb-char-wrap.host-char .vtb-char-label {
+            background:rgba(99,102,241,0.2); color:#a5b4fc;
+            border-color:rgba(99,102,241,0.5);
+        }
+        .vtb-char-wrap.guest-char .vtb-char-label {
+            background:rgba(236,72,153,0.2); color:#f9a8d4;
+            border-color:rgba(236,72,153,0.5);
+        }
+        .vtb-char-wrap.speaking.host-char .vtb-char-label {
+            animation: vtb-glow-pulse 1.5s ease-in-out infinite;
+            background:rgba(99,102,241,0.35);
+        }
+        .vtb-char-wrap.speaking.guest-char .vtb-char-label {
+            animation: vtb-glow-pulse-pink 1.5s ease-in-out infinite;
+            background:rgba(236,72,153,0.35);
+        }
+        /* mouth ripple indicator */
+        .vtb-mouth-bar {
+            display:flex; gap:3px; margin-top:6px; height:18px; align-items:center;
+            opacity:0; transition:opacity 0.3s;
+        }
+        .vtb-char-wrap.speaking .vtb-mouth-bar { opacity:1; }
+        .vtb-mouth-bar span {
+            width:3px; background:#a5b4fc; border-radius:2px;
+            animation:none;
+        }
+        .vtb-char-wrap.guest-char .vtb-mouth-bar span { background:#f9a8d4; }
+        @keyframes vtb-bar1 { 0%,100%{height:4px}  50%{height:16px} }
+        @keyframes vtb-bar2 { 0%,100%{height:8px}  40%{height:4px}  }
+        @keyframes vtb-bar3 { 0%,100%{height:14px} 60%{height:6px}  }
+        @keyframes vtb-bar4 { 0%,100%{height:6px}  30%{height:14px} }
+        @keyframes vtb-bar5 { 0%,100%{height:10px} 70%{height:4px}  }
+        .vtb-char-wrap.speaking .vtb-mouth-bar span:nth-child(1){animation:vtb-bar1 0.5s ease infinite;}
+        .vtb-char-wrap.speaking .vtb-mouth-bar span:nth-child(2){animation:vtb-bar2 0.4s ease infinite 0.1s;}
+        .vtb-char-wrap.speaking .vtb-mouth-bar span:nth-child(3){animation:vtb-bar3 0.6s ease infinite 0.05s;}
+        .vtb-char-wrap.speaking .vtb-mouth-bar span:nth-child(4){animation:vtb-bar4 0.45s ease infinite 0.15s;}
+        .vtb-char-wrap.speaking .vtb-mouth-bar span:nth-child(5){animation:vtb-bar5 0.55s ease infinite 0.08s;}
+
         /* Puter 登入狀態列 */
         .puter-bar {
             display: flex; align-items: center; gap: 8px;
@@ -493,6 +602,149 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- ═══════════════ VTuber 舞台視窗 ═══════════════ -->
+<div id="vtuberStageModal" style="
+    display:none; position:fixed; inset:0; z-index:2000;
+    background: #0a0a0f;
+    flex-direction:column; align-items:center; justify-content:flex-end;
+    overflow:hidden;
+">
+    <!-- ── 背景圖層 ── -->
+    <div id="stageBgLayer" style="
+        position:absolute; inset:0; z-index:0;
+        background-image: url('https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1920&q=85');
+        background-size:cover; background-position:center bottom;
+        transition: opacity 0.6s ease;
+    "></div>
+    <!-- 背景暗化遮罩（保持角色可見度） -->
+    <div style="
+        position:absolute; inset:0; z-index:1; pointer-events:none;
+        background: linear-gradient(to bottom,
+            rgba(0,0,0,0.25) 0%,
+            rgba(0,0,0,0.15) 50%,
+            rgba(0,0,0,0.55) 100%);
+    "></div>
+
+    <!-- 星空粒子（純色背景時顯示） -->
+    <canvas id="stageStarCanvas" style="position:absolute;inset:0;pointer-events:none;z-index:0;display:none;"></canvas>
+
+    <!-- ── 背景選擇器面板 ── -->
+    <div id="stageBgPicker" style="
+        position:absolute; top:20px; left:20px; z-index:25;
+        background:rgba(10,10,20,0.75); backdrop-filter:blur(12px);
+        border:1px solid rgba(255,255,255,0.1); border-radius:14px;
+        padding:14px 16px; min-width:220px;
+        font-family:'Noto Sans TC',sans-serif;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    ">
+        <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.12em;color:#94a3b8;margin-bottom:10px;">🖼 舞台背景</div>
+
+        <!-- 預設場景縮圖列 -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;" id="bgPresetRow"></div>
+
+        <!-- 自訂 URL -->
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+            <input id="bgCustomUrl" type="text" placeholder="貼上圖片網址…"
+                style="flex:1;padding:6px 10px;font-size:0.78rem;
+                       background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);
+                       border-radius:8px;color:#f1f5f9;font-family:inherit;outline:none;"
+                onkeydown="if(event.key==='Enter')applyBgUrl(this.value)">
+            <button onclick="applyBgUrl(document.getElementById('bgCustomUrl').value)"
+                style="padding:6px 10px;font-size:0.75rem;border-radius:8px;
+                       background:rgba(99,102,241,0.7);border:none;color:#fff;cursor:pointer;
+                       font-family:inherit;white-space:nowrap;">套用</button>
+        </div>
+
+        <!-- 本地上傳 -->
+        <label style="
+            display:flex;align-items:center;gap:6px;cursor:pointer;
+            padding:6px 10px;border-radius:8px;font-size:0.78rem;color:#cbd5e1;
+            background:rgba(255,255,255,0.05);border:1px dashed rgba(255,255,255,0.15);
+            transition:background 0.2s;
+        " onmouseover="this.style.background='rgba(255,255,255,0.1)'"
+           onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+            <span>📁</span><span>上傳本地圖片</span>
+            <input type="file" accept="image/*" style="display:none"
+                onchange="applyBgFile(this)">
+        </label>
+
+        <!-- 折疊按鈕 -->
+        <button onclick="toggleBgPicker()" id="bgPickerToggle" style="
+            position:absolute;top:10px;right:10px;
+            background:none;border:none;color:#64748b;cursor:pointer;
+            font-size:0.8rem;padding:2px 6px;border-radius:6px;
+            transition:color 0.2s;
+        " onmouseover="this.style.color='#f1f5f9'" onmouseout="this.style.color='#64748b'">▲</button>
+    </div>
+
+    <!-- 舞台燈光暈染 -->
+    <div id="stageLightHost" style="
+        position:absolute; bottom:0; left:15%; width:340px; height:500px;
+        background: radial-gradient(ellipse at bottom, rgba(99,102,241,0.35) 0%, transparent 70%);
+        transition: opacity 0.5s ease; opacity:0.3; pointer-events:none; z-index:1;
+    "></div>
+    <div id="stageLightGuest" style="
+        position:absolute; bottom:0; right:15%; width:340px; height:500px;
+        background: radial-gradient(ellipse at bottom, rgba(236,72,153,0.35) 0%, transparent 70%);
+        transition: opacity 0.5s ease; opacity:0.3; pointer-events:none; z-index:1;
+    "></div>
+
+    <!-- 字幕背景條 -->
+    <div style="
+        position:absolute; bottom:0; left:0; right:0; height:180px;
+        background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+        z-index:5; pointer-events:none;
+    "></div>
+
+    <!-- 角色立繪區 -->
+    <div id="stageCharacters" style="
+        position:absolute; bottom:130px; left:0; right:0;
+        display:flex; justify-content:space-around; align-items:flex-end;
+        padding:0 20px; z-index:3;
+    "></div>
+
+    <!-- 字幕區 -->
+    <div style="position:relative;z-index:10;width:100%;padding:0 40px 30px;text-align:center;">
+        <div id="stageSubtitleSpeaker" style="
+            font-family:'Noto Sans TC',sans-serif; font-size:0.9rem; font-weight:700;
+            letter-spacing:0.15em; text-transform:uppercase; margin-bottom:8px;
+            color:#a5b4fc; text-shadow:0 0 20px rgba(165,180,252,0.8);
+            transition: color 0.4s ease;
+        ">— 準備中 —</div>
+        <div id="stageSubtitleText" style="
+            font-family:'Noto Sans TC',sans-serif; font-size:1.35rem; font-weight:500;
+            color:#f1f5f9; line-height:1.7;
+            min-height:60px; display:flex; align-items:center; justify-content:center;
+            text-shadow:0 2px 20px rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.4); border-radius:12px; padding:12px 24px;
+            border:1px solid rgba(255,255,255,0.06);
+            backdrop-filter:blur(6px);
+            transition: border-color 0.4s ease;
+        ">載入中...</div>
+        <!-- 進度 -->
+        <div id="stageProgress" style="
+            margin-top:12px; font-size:0.75rem; color:#64748b; letter-spacing:0.1em;
+        ">0 / 0</div>
+    </div>
+
+    <!-- 關閉按鈕 -->
+    <button onclick="closeVtuberStage()" style="
+        position:absolute; top:20px; right:24px; z-index:20;
+        background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);
+        color:#f1f5f9; border-radius:50%; width:44px; height:44px;
+        font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center;
+        transition:background 0.2s; backdrop-filter:blur(6px);
+    " onmouseover="this.style.background='rgba(255,255,255,0.18)'"
+       onmouseout="this.style.background='rgba(255,255,255,0.08)'">✕</button>
+
+    <!-- 標題 -->
+    <div style="
+        position:absolute; top:20px; left:50%; transform:translateX(-50%);
+        font-family:'Noto Sans TC',sans-serif; font-size:0.8rem; letter-spacing:0.2em;
+        color:rgba(255,255,255,0.3); z-index:20; white-space:nowrap;
+    ">✦ VTUBER LIVE STAGE ✦</div>
 </div>
 
 <!-- 新增/編輯角色視窗 -->
@@ -647,30 +899,279 @@
         return true;
     }
 
-    // 播放全部 (順序朗讀，帶進度顯示)
+    // ══════════════════════════════════════════════════
+    //  VTuber Stage Engine
+    // ══════════════════════════════════════════════════
+
+    let stageStarAnimId = null;
+
+    function initStarCanvas() {
+        const canvas = document.getElementById('stageStarCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const stars = Array.from({length:180}, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.5 + 0.3,
+            sp: Math.random() * 0.4 + 0.1,
+            a: Math.random()
+        }));
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (const s of stars) {
+                s.a += s.sp * 0.02;
+                const alpha = (Math.sin(s.a) + 1) / 2 * 0.8 + 0.1;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+                ctx.fillStyle = `rgba(200,210,255,${alpha})`;
+                ctx.fill();
+            }
+            stageStarAnimId = requestAnimationFrame(draw);
+        }
+        draw();
+    }
+
+    function buildStageCharacters() {
+        const container = document.getElementById('stageCharacters');
+        container.innerHTML = '';
+        const hostId  = document.getElementById('hostCharacter').value;
+        const guestId = document.getElementById('guestCharacter').value;
+        const characters = [
+            state.characters.find(c => c.id === hostId),
+            state.characters.find(c => c.id === guestId)
+        ].filter(Boolean);
+
+        characters.forEach((char, idx) => {
+            const isGuest = char.role === 'guest';
+            const roleClass = isGuest ? 'guest-char' : 'host-char';
+            // flip guest to face left (towards host)
+            const scaleX = isGuest ? -1 : 1;
+
+            const wrap = document.createElement('div');
+            wrap.className = `vtb-char-wrap dimmed ${roleClass}`;
+            wrap.id = `vtb-wrap-${char.id}`;
+            wrap.style.setProperty('--char-color', isGuest ? '#ec4899' : '#6366f1');
+
+            const imgSrc = char.imageUrl || `https://api.dicebear.com/8.x/adventurer/svg?seed=${encodeURIComponent(char.name)}&size=300`;
+
+            wrap.innerHTML = `
+                <img src="${imgSrc}" class="vtb-char-img idle-anim"
+                     id="vtb-img-${char.id}"
+                     style="--sx:${scaleX}; transform:scaleX(${scaleX});"
+                     onerror="this.src='https://api.dicebear.com/8.x/adventurer/svg?seed=${encodeURIComponent(char.name)}'">
+                <div class="vtb-mouth-bar">
+                    <span></span><span></span><span></span><span></span><span></span>
+                </div>
+                <div class="vtb-char-label">${char.name}</div>
+            `;
+            container.appendChild(wrap);
+        });
+    }
+
+    function setActiveSpeaker(charId) {
+        const allWraps = document.querySelectorAll('.vtb-char-wrap');
+        allWraps.forEach(w => {
+            const isActive = w.id === `vtb-wrap-${charId}`;
+            w.classList.toggle('dimmed', !isActive);
+            w.classList.toggle('speaking', isActive);
+            const img = w.querySelector('.vtb-char-img');
+            if (img) {
+                img.classList.toggle('speaking-anim', isActive);
+                img.classList.toggle('idle-anim', !isActive);
+            }
+        });
+        // light colour
+        const char = state.characters.find(c => c.id === charId);
+        const isGuest = char?.role === 'guest';
+        document.getElementById('stageLightHost').style.opacity  = isGuest ? '0.15' : '0.65';
+        document.getElementById('stageLightGuest').style.opacity = isGuest ? '0.65' : '0.15';
+
+        // subtitle colour
+        const speaker = document.getElementById('stageSubtitleSpeaker');
+        const textBox  = document.getElementById('stageSubtitleText');
+        if (isGuest) {
+            speaker.style.color = '#f9a8d4';
+            speaker.style.textShadow = '0 0 20px rgba(249,168,212,0.9)';
+            textBox.style.borderColor = 'rgba(236,72,153,0.4)';
+        } else {
+            speaker.style.color = '#a5b4fc';
+            speaker.style.textShadow = '0 0 20px rgba(165,180,252,0.9)';
+            textBox.style.borderColor = 'rgba(99,102,241,0.4)';
+        }
+    }
+
+    function setSubtitle(speakerName, text, current, total) {
+        const sp = document.getElementById('stageSubtitleSpeaker');
+        const tx = document.getElementById('stageSubtitleText');
+        const pg = document.getElementById('stageProgress');
+        sp.textContent = `✦ ${speakerName} ✦`;
+        tx.style.animation = 'none';
+        tx.offsetHeight; // reflow
+        tx.style.animation = 'vtb-subtitle-in 0.3s ease forwards';
+        tx.textContent = text;
+        pg.textContent = `${current} / ${total}`;
+    }
+
+    // ══════════════════════════════════════════════════
+    //  背景管理
+    // ══════════════════════════════════════════════════
+
+    const BG_PRESETS = [
+        { label:'客廳',  emoji:'🛋',  url:'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1920&q=85' },
+        { label:'夜城',  emoji:'🌃',  url:'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1600&q=80' },
+        { label:'書房',  emoji:'📚',  url:'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=1600&q=80' },
+        { label:'咖啡廳',emoji:'☕',  url:'https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=1600&q=80' },
+        { label:'星空',  emoji:'✨',  url:'__stars__' },
+    ];
+
+    let bgPickerCollapsed = false;
+
+    function buildBgPresets() {
+        const row = document.getElementById('bgPresetRow');
+        if (!row) return;
+        row.innerHTML = '';
+        BG_PRESETS.forEach((p, i) => {
+            const btn = document.createElement('button');
+            btn.title = p.label;
+            btn.innerHTML = `<span style="font-size:1.1rem">${p.emoji}</span><br><span style="font-size:0.6rem;color:#94a3b8">${p.label}</span>`;
+            btn.style.cssText = `
+                width:44px;height:48px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);
+                background:rgba(255,255,255,0.06);cursor:pointer;display:flex;flex-direction:column;
+                align-items:center;justify-content:center;gap:1px;transition:all 0.2s;
+                font-family:inherit;line-height:1;padding:2px;
+            `;
+            btn.id = `bgPreset_${i}`;
+            btn.onmouseover = () => btn.style.background = 'rgba(99,102,241,0.3)';
+            btn.onmouseout  = () => btn.style.background = btn._active ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.06)';
+            btn.onclick = () => applyBgPreset(p.url, i);
+            row.appendChild(btn);
+        });
+        // 預設選中第一個
+        applyBgPreset(BG_PRESETS[0].url, 0);
+    }
+
+    function applyBgPreset(url, activeIdx) {
+        // 更新 active 樣式
+        BG_PRESETS.forEach((_, i) => {
+            const b = document.getElementById(`bgPreset_${i}`);
+            if (!b) return;
+            b._active = (i === activeIdx);
+            b.style.background   = b._active ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.06)';
+            b.style.borderColor  = b._active ? 'rgba(99,102,241,0.7)' : 'rgba(255,255,255,0.12)';
+        });
+        if (url === '__stars__') {
+            showStarsBg();
+        } else {
+            applyBgUrl(url);
+        }
+    }
+
+    function applyBgUrl(url) {
+        if (!url || !url.trim()) return;
+        const layer = document.getElementById('stageBgLayer');
+        const canvas = document.getElementById('stageStarCanvas');
+        if (stageStarAnimId) { cancelAnimationFrame(stageStarAnimId); stageStarAnimId = null; }
+        canvas.style.display = 'none';
+        layer.style.backgroundImage = `url('${url.trim()}')`;
+        layer.style.opacity = '1';
+    }
+
+    function applyBgFile(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            // 清除預設 active 狀態
+            BG_PRESETS.forEach((_, i) => {
+                const b = document.getElementById(`bgPreset_${i}`);
+                if (b) { b._active = false; b.style.background='rgba(255,255,255,0.06)'; b.style.borderColor='rgba(255,255,255,0.12)'; }
+            });
+            applyBgUrl(e.target.result);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function showStarsBg() {
+        const layer  = document.getElementById('stageBgLayer');
+        const canvas = document.getElementById('stageStarCanvas');
+        layer.style.opacity = '0';
+        canvas.style.display = 'block';
+        initStarCanvas();
+    }
+
+    function toggleBgPicker() {
+        bgPickerCollapsed = !bgPickerCollapsed;
+        const picker = document.getElementById('stageBgPicker');
+        const toggle = document.getElementById('bgPickerToggle');
+        // 隱藏/顯示內容（保留標題行）
+        const children = picker.querySelectorAll(':scope > *:not(:first-child):not(button#bgPickerToggle)');
+        children.forEach(el => el.style.display = bgPickerCollapsed ? 'none' : '');
+        toggle.textContent = bgPickerCollapsed ? '▼' : '▲';
+        picker.style.minWidth = bgPickerCollapsed ? 'auto' : '220px';
+    }
+
+    function openVtuberStage() {
+        const modal = document.getElementById('vtuberStageModal');
+        modal.style.display = 'flex';
+        buildStageCharacters();
+        buildBgPresets();   // 初始化背景選擇器（含預設套用）
+    }
+
+    function closeVtuberStage() {
+        const modal = document.getElementById('vtuberStageModal');
+        modal.style.display = 'none';
+        if (stageStarAnimId) { cancelAnimationFrame(stageStarAnimId); stageStarAnimId = null; }
+        stopAllSpeech();
+    }
+
+    // 播放全部 (順序朗讀 + VTuber 舞台)
     async function playAllDialogue() {
         if (!state.currentInterview.dialogue.length) {
             showNotification('沒有對話可播放', 'error');
             return;
         }
+        openVtuberStage();
         stopAllSpeech();
+        await new Promise(r => setTimeout(r, 400)); // let stage render
+
         const total = state.currentInterview.dialogue.length;
         updatePlayerStatus(`🎧 開始播放全部 (0/${total})`, true);
+
         for (let i = 0; i < total; i++) {
-            if (!state.isSpeaking && !state.speechQueue.length) {
-                // 如果被外部 stop 中斷則離開
-                if (!state.isSpeaking && i>0) break;
-            }
+            if (!state.isSpeaking && i > 0) break;
             state.isSpeaking = true;
-            updatePlayerStatus(`🔊 播放中: ${i+1}/${total} - ${state.currentInterview.dialogue[i].characterName}`, true);
+
+            const item = state.currentInterview.dialogue[i];
+            const character = state.characters.find(c => c.id === item.characterId);
+            const charName = character ? character.name : item.characterName || '?';
+
+            setActiveSpeaker(item.characterId);
+            setSubtitle(charName, item.text, i + 1, total);
+            updatePlayerStatus(`🔊 播放中: ${i+1}/${total} - ${charName}`, true);
+
             try {
                 await speakDialogueAtIndex(i);
             } catch (err) {
                 console.warn('播放單句失敗', err);
             }
-            // 避免連續播放過快
-            await new Promise(r => setTimeout(r, 200));
+            await new Promise(r => setTimeout(r, 180));
         }
+
+        // 結束——兩人都亮
+        document.querySelectorAll('.vtb-char-wrap').forEach(w => {
+            w.classList.remove('dimmed','speaking');
+            w.classList.add('speaking');
+            const img = w.querySelector('.vtb-char-img');
+            if(img){ img.classList.remove('speaking-anim'); img.classList.add('idle-anim'); }
+        });
+        document.getElementById('stageLightHost').style.opacity  = '0.4';
+        document.getElementById('stageLightGuest').style.opacity = '0.4';
+        document.getElementById('stageSubtitleSpeaker').textContent = '— 播放完畢 —';
+        document.getElementById('stageSubtitleText').textContent = '感謝收看 ✨';
+        document.getElementById('stageProgress').textContent = `${total} / ${total}`;
+
         state.isSpeaking = false;
         updatePlayerStatus('✅ 全部播放完畢', false);
     }
