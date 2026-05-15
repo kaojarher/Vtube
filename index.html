@@ -400,6 +400,10 @@
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(400px); opacity: 0; }
         }
+        @keyframes recDotBlink {
+            0%,100% { opacity:1; transform:scale(1); }
+            50%     { opacity:0.3; transform:scale(0.7); }
+        }
 
         /* ══════ VTuber Stage Styles ══════ */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -727,6 +731,29 @@
         <div id="stageProgress" style="
             margin-top:12px; font-size:0.75rem; color:#64748b; letter-spacing:0.1em;
         ">0 / 0</div>
+    </div>
+
+    <!-- 錄製控制列 -->
+    <div id="stageRecordBar" style="
+        position:absolute; top:20px; right:76px; z-index:20;
+        display:flex; align-items:center; gap:8px;
+    ">
+        <button id="recordBtn" onclick="toggleRecording()" style="
+            background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4);
+            color:#fca5a5; border-radius:24px; padding:6px 16px;
+            font-size:0.8rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px;
+            transition:all 0.2s; backdrop-filter:blur(6px); white-space:nowrap; letter-spacing:0.05em;
+        " onmouseover="if(!_isRecording)this.style.background='rgba(239,68,68,0.28)'"
+           onmouseout="if(!_isRecording)this.style.background='rgba(239,68,68,0.15)'">
+            <span id="recordDot" style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block;"></span>
+            <span id="recordBtnLabel">開始錄製</span>
+        </button>
+        <div id="recordTimer" style="
+            font-size:0.75rem; font-weight:700; color:#fca5a5; letter-spacing:0.12em;
+            display:none; font-variant-numeric:tabular-nums;
+            background:rgba(0,0,0,0.35); border-radius:8px; padding:4px 10px;
+            backdrop-filter:blur(6px); border:1px solid rgba(239,68,68,0.3);
+        ">00:00</div>
     </div>
 
     <!-- 關閉按鈕 -->
@@ -1597,6 +1624,221 @@ async function generateDialogue() {
         loadDataFromStorage();
         if(typeof speechSynthesis !== 'undefined') getChineseVoice();
     });
+
+    // ══════════════════════════════════════════════════
+    //  🎬 錄製引擎 (Screen Capture + MediaRecorder)
+    // ══════════════════════════════════════════════════
+
+    let _isRecording      = false;
+    let _mediaRecorder    = null;
+    let _recordedChunks   = [];
+    let _recordTimerInt   = null;
+    let _recordStartTime  = 0;
+    let _recordStream     = null;
+    let _audioCtx         = null;
+    let _audioDest        = null;
+
+    // 建立 AudioContext 並 patch SpeechSynthesis 輸出（透過系統音訊捕捉）
+    function _buildAudioCapture() {
+        try {
+            _audioCtx  = new (window.AudioContext || window.webkitAudioContext)();
+            _audioDest = _audioCtx.createMediaStreamDestination();
+            return _audioDest.stream;
+        } catch(e) {
+            console.warn('AudioContext 建立失敗:', e);
+            return null;
+        }
+    }
+
+    async function toggleRecording() {
+        if (_isRecording) {
+            await stopRecording();
+        } else {
+            await startRecording();
+        }
+    }
+
+    async function startRecording() {
+        const stage = document.getElementById('vtuberStageModal');
+        if (!stage || stage.style.display === 'none') {
+            showNotification('請先開啟 VTuber 舞台再錄製', 'error');
+            return;
+        }
+
+        try {
+            // 1. 捕捉分頁畫面（含 VTuber 舞台）
+            const displayStream = await navigator.mediaDevices.getDisplayMedia({
+                video: {
+                    frameRate: { ideal: 30, max: 60 },
+                    cursor: 'never'
+                },
+                audio: {
+                    echoCancellation: false,
+                    noiseSuppression: false,
+                    sampleRate: 44100
+                },
+                preferCurrentTab: true
+            });
+
+            // 2. 合併視訊 + 系統音訊（若有）
+            const tracks = [...displayStream.getVideoTracks()];
+            const audioTracks = displayStream.getAudioTracks();
+
+            // 3. 建立合成音訊流（捕捉 Speech API 輸出）
+            let combinedStream;
+            if (audioTracks.length > 0) {
+                // 有系統音訊，直接合用（含語音朗讀輸出）
+                combinedStream = new MediaStream([...tracks, ...audioTracks]);
+            } else {
+                // 無系統音訊，退回純視訊
+                combinedStream = new MediaStream(tracks);
+                showNotification('⚠️ 建議勾選「分享分頁音訊」以錄製語音', 'info');
+            }
+
+            _recordStream = displayStream;
+            _recordedChunks = [];
+
+            // 4. 選擇最佳 MIME（優先 mp4，退回 webm）
+            const mimeOptions = [
+                'video/mp4;codecs=avc1,mp4a.40.2',
+                'video/mp4',
+                'video/webm;codecs=vp9,opus',
+                'video/webm;codecs=vp8,opus',
+                'video/webm'
+            ];
+            const mimeType = mimeOptions.find(m => MediaRecorder.isTypeSupported(m)) || 'video/webm';
+
+            _mediaRecorder = new MediaRecorder(combinedStream, {
+                mimeType,
+                videoBitsPerSecond: 4_000_000,   // 4 Mbps
+                audioBitsPerSecond: 128_000        // 128 kbps
+            });
+
+            _mediaRecorder.ondataavailable = e => {
+                if (e.data && e.data.size > 0) _recordedChunks.push(e.data);
+            };
+
+            _mediaRecorder.onstop = () => _finalizeRecording(mimeType);
+
+            // 每秒切片（提高穩定度）
+            _mediaRecorder.start(1000);
+            _isRecording = true;
+
+            // 使用者停止分享時自動結束
+            displayStream.getVideoTracks()[0].onended = () => {
+                if (_isRecording) stopRecording();
+            };
+
+            // UI 更新
+            _updateRecordUI(true);
+            _startTimer();
+
+            showNotification('🔴 錄製開始 — 結束後點「停止錄製」下載影片', 'success');
+
+        } catch(err) {
+            console.error('錄製錯誤:', err);
+            if (err.name === 'NotAllowedError') {
+                showNotification('❌ 未授權螢幕錄製，請在彈窗中允許', 'error');
+            } else {
+                showNotification('❌ 錄製啟動失敗: ' + err.message, 'error');
+            }
+            _isRecording = false;
+        }
+    }
+
+    async function stopRecording() {
+        if (!_mediaRecorder || _mediaRecorder.state === 'inactive') return;
+
+        return new Promise(resolve => {
+            _mediaRecorder.onstop = () => {
+                _finalizeRecording(_mediaRecorder.mimeType);
+                resolve();
+            };
+            _mediaRecorder.stop();
+            if (_recordStream) {
+                _recordStream.getTracks().forEach(t => t.stop());
+                _recordStream = null;
+            }
+            _isRecording = false;
+            _stopTimer();
+            _updateRecordUI(false);
+        });
+    }
+
+    function _finalizeRecording(mimeType) {
+        if (_recordedChunks.length === 0) {
+            showNotification('❌ 錄製內容為空，請重試', 'error');
+            return;
+        }
+
+        const isMP4 = mimeType.includes('mp4');
+        const ext   = isMP4 ? 'mp4' : 'webm';
+        const blob  = new Blob(_recordedChunks, { type: mimeType });
+
+        const filename = `vtuber_stage_${new Date().toISOString().slice(0,19).replace(/[T:]/g,'-')}.${ext}`;
+        const url = URL.createObjectURL(blob);
+        const a   = document.createElement('a');
+        a.href     = url;
+        a.download = filename;
+        a.click();
+
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+        _recordedChunks = [];
+
+        const sizeMB = (blob.size / 1_048_576).toFixed(1);
+        showNotification(`✅ 影片已下載！${filename}（${sizeMB} MB）`, 'success');
+    }
+
+    function _updateRecordUI(isActive) {
+        const btn   = document.getElementById('recordBtn');
+        const dot   = document.getElementById('recordDot');
+        const label = document.getElementById('recordBtnLabel');
+        const timer = document.getElementById('recordTimer');
+        if (!btn) return;
+
+        if (isActive) {
+            btn.style.background   = 'rgba(239,68,68,0.5)';
+            btn.style.borderColor  = 'rgba(239,68,68,0.9)';
+            btn.style.color        = '#ffffff';
+            dot.style.animation    = 'recDotBlink 1s ease-in-out infinite';
+            label.textContent      = '停止錄製';
+            timer.style.display    = 'block';
+        } else {
+            btn.style.background   = 'rgba(239,68,68,0.15)';
+            btn.style.borderColor  = 'rgba(239,68,68,0.4)';
+            btn.style.color        = '#fca5a5';
+            dot.style.animation    = 'none';
+            label.textContent      = '開始錄製';
+            timer.style.display    = 'none';
+            timer.textContent      = '00:00';
+        }
+    }
+
+    function _startTimer() {
+        _recordStartTime = Date.now();
+        const timerEl = document.getElementById('recordTimer');
+        _recordTimerInt = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - _recordStartTime) / 1000);
+            const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+            const s = String(elapsed % 60).padStart(2, '0');
+            if (timerEl) timerEl.textContent = `${m}:${s}`;
+        }, 1000);
+    }
+
+    function _stopTimer() {
+        clearInterval(_recordTimerInt);
+        _recordTimerInt = null;
+    }
+
+    // 自動停止錄製（若使用者直接關閉舞台）
+    // 攔截原始 closeVtuberStage，在關閉前先停止錄製
+    const _origClose = window.closeVtuberStage;
+    window.closeVtuberStage = async function() {
+        if (_isRecording) {
+            await stopRecording();
+        }
+        _origClose();
+    };
 
     // ── Puter 登入初始化 ─────────────────────────────────────
     async function initPuter() {
